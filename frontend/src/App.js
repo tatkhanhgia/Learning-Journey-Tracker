@@ -47,10 +47,13 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🔍 AuthProvider useEffect triggered, token:', token);
     if (token) {
+      console.log('🔍 Setting axios authorization header');
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchCurrentUser();
     } else {
+      console.log('🔍 No token found, setting loading to false');
       setLoading(false);
     }
   }, [token]);
