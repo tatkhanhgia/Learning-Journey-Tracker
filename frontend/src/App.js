@@ -46,6 +46,8 @@ const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
+  console.log('🔍 AuthProvider render - user:', user, 'token:', token, 'loading:', loading);
+
   useEffect(() => {
     console.log('🔍 AuthProvider useEffect triggered, token:', token);
     if (token) {
