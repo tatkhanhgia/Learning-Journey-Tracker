@@ -66,12 +66,15 @@ const AuthProvider = ({ children }) => {
       console.log('🔍 API URL:', `${API}/auth/me`);
       const response = await axios.get(`${API}/auth/me`);
       console.log('✅ User fetch successful:', response.data);
+      console.log('🔍 About to call setUser with:', response.data);
       setUser(response.data);
+      console.log('✅ setUser called successfully');
     } catch (error) {
       console.error('❌ Failed to fetch user:', error);
       console.error('❌ Error details:', error.response?.data);
       logout();
     } finally {
+      console.log('🔍 Setting loading to false');
       setLoading(false);
     }
   };
