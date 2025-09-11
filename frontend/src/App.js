@@ -83,8 +83,21 @@ const AuthProvider = ({ children }) => {
       toast.success(`Chào mừng ${user_info.full_name}!`);
       return true;
     } catch (error) {
-      const message = error.response?.data?.detail || 'Đăng nhập thất bại';
-      toast.error(message);
+      console.error('Login error:', error);
+      let message = 'Đăng nhập thất bại';
+      
+      if (error.response?.status === 401) {
+        message = error.response?.data?.detail || 'Tên đăng nhập hoặc mật khẩu không đúng';
+      } else if (error.response?.status === 500) {
+        message = 'Lỗi server, vui lòng thử lại sau';
+      } else if (error.code === 'NETWORK_ERROR' || !error.response) {
+        message = 'Không thể kết nối đến server';
+      }
+      
+      toast.error(message, {
+        duration: 4000,
+        position: 'top-center'
+      });
       return false;
     }
   };
