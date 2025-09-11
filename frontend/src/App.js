@@ -128,16 +128,21 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage(''); // Clear previous errors
+    
     if (!username || !password) {
+      setErrorMessage('Vui lòng nhập đầy đủ thông tin');
       toast.error('Vui lòng nhập đầy đủ thông tin');
       return;
     }
 
     setIsLogging(true);
     const success = await login(username, password);
-    if (success) {
-      navigate('/', { replace: true });
+    
+    if (!success) {
+      setErrorMessage('Tên đăng nhập hoặc mật khẩu không đúng');
     }
+    
     setIsLogging(false);
   };
 
