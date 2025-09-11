@@ -80,7 +80,10 @@ const AuthProvider = ({ children }) => {
       localStorage.setItem('token', access_token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       
-      toast.success(`Chào mừng ${user_info.full_name}!`);
+      toast.success(`Chào mừng ${user_info.full_name}!`, {
+        duration: 3000,
+        position: 'top-center'
+      });
       return true;
     } catch (error) {
       console.error('Login error:', error);
