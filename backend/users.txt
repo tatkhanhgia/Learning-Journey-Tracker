@@ -1,0 +1,5 @@
+admin,admin123,Quản Trị Viên
+user1,pass1,Nguyễn Văn An
+user2,pass2,Trần Thị Bình
+user3,pass3,Lê Hoàng Cường
+user4,pass4,Phạm Minh Đức
