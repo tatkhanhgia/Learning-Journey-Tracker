@@ -141,6 +141,8 @@ const LoginPage = () => {
     
     if (!success) {
       setErrorMessage('Tên đăng nhập hoặc mật khẩu không đúng');
+    } else {
+      navigate('/', { replace: true });
     }
     
     setIsLogging(false);
