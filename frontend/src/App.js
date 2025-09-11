@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Avatar, AvatarFallback } from './components/ui/avatar';
 import { Progress } from './components/ui/progress';
 import { toast } from 'sonner';
+import { Toaster } from './components/ui/toaster';
 import { 
   LogIn, 
   LogOut, 
