@@ -1,6 +1,4 @@
 # Learning-Journey-Tracker
-Track study progress, manage learning goals, and optimize your academic journey with this intuitive learning management tool
-# Study Tracker
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/)
