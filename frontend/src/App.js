@@ -185,6 +185,14 @@ const LoginPage = () => {
                   className="h-11 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
+              
+              {/* Error Message Display */}
+              {errorMessage && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-600 text-center">{errorMessage}</p>
+                </div>
+              )}
+              
               <Button
                 type="submit"
                 disabled={isLogging}
