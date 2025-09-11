@@ -57,10 +57,14 @@ const AuthProvider = ({ children }) => {
 
   const fetchCurrentUser = async () => {
     try {
+      console.log('🔍 Fetching current user with token:', token);
+      console.log('🔍 API URL:', `${API}/auth/me`);
       const response = await axios.get(`${API}/auth/me`);
+      console.log('✅ User fetch successful:', response.data);
       setUser(response.data);
     } catch (error) {
-      console.error('Failed to fetch user:', error);
+      console.error('❌ Failed to fetch user:', error);
+      console.error('❌ Error details:', error.response?.data);
       logout();
     } finally {
       setLoading(false);
