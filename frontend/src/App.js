@@ -25,6 +25,7 @@ import {
   Trash2,
   User,
   ChevronRight,
+  ChevronDown,
   ArrowLeft,
   Home,
   Play,
