@@ -234,17 +234,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Parse learning structure from hierarchical txt file"
-    - "Create hierarchical API endpoints"
-    - "Update progress tracking for 3-level hierarchy"
-    - "Update notes system for hierarchical structure"
-    - "Implement hierarchical navigation with Resources → Modules → Sessions"
-    - "Add breadcrumb navigation"
     - "Update progress tracking UI for hierarchical structure"
-    - "Update notes UI for hierarchical selection"
-  stuck_tasks: []
-  test_all: true
-  test_priority: "high_first"
+  stuck_tasks:
+    - "Update progress tracking UI for hierarchical structure"
+  test_all: false
+  test_priority: "stuck_first"
 
 agent_communication:
   - agent: "main"
