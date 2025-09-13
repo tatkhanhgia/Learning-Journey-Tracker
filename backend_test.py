@@ -382,13 +382,19 @@ class LearnTrackHierarchicalAPITester:
         
         resources = self.test_get_resources()
         
-        # Test structure navigation
+        # Test structure navigation - use Page resource for better URL compatibility
         if resources and len(resources) > 0:
-            test_resource = resources[0]['name']
+            # Find Page resource for testing (has English module names)
+            test_resource = "Page"
+            for r in resources:
+                if r['name'] == 'Page':
+                    test_resource = r['name']
+                    break
+            
             modules = self.test_get_modules(test_resource)
             
             if modules and len(modules) > 0:
-                test_module = modules[0]['name']
+                test_module = modules[0]['name']  # Should be "Module 1: React Basics"
                 sessions = self.test_get_sessions(test_resource, test_module)
         
         # Test invalid structure endpoints
