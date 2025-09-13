@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-LearnTrack Backend API Testing Suite
+LearnTrack Backend API Testing Suite - Hierarchical Learning Structure
 Tests all API endpoints for the Vietnamese learning progress tracking application
+with new 3-tier hierarchy: Resources → Modules → Sessions
 """
 
 import requests
@@ -9,7 +10,7 @@ import sys
 import json
 from datetime import datetime
 
-class LearnTrackAPITester:
+class LearnTrackHierarchicalAPITester:
     def __init__(self, base_url="https://learn-track-7.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
@@ -18,6 +19,7 @@ class LearnTrackAPITester:
         self.tests_run = 0
         self.tests_passed = 0
         self.test_results = []
+        self.learning_structure = None
 
     def log_test(self, name, success, details=""):
         """Log test results"""
@@ -93,21 +95,70 @@ class LearnTrackAPITester:
         self.log_test("Get current user", success, details)
         return success
 
-    def test_get_levels(self):
-        """Test getting learning levels"""
-        success, details, response = self.make_request('GET', 'config/levels')
+    def test_get_learning_structure(self):
+        """Test getting complete learning structure"""
+        success, details, response = self.make_request('GET', 'structure')
         
-        if success and 'levels' in response:
-            levels = response['levels']
-            if len(levels) > 0:
-                self.log_test("Get levels", True, f"Found {len(levels)} levels")
-                return levels
-            else:
-                self.log_test("Get levels", False, "No levels found")
-                return []
+        if success and 'resources' in response:
+            self.learning_structure = response
+            resources = response['resources']
+            total_modules = sum(len(r.get('modules', [])) for r in resources)
+            total_sessions = sum(len(m.get('sessions', [])) for r in resources for m in r.get('modules', []))
+            
+            self.log_test("Get learning structure", True, 
+                         f"Found {len(resources)} resources, {total_modules} modules, {total_sessions} sessions")
+            return response
         else:
-            self.log_test("Get levels", False, details)
+            self.log_test("Get learning structure", False, details)
+            return None
+
+    def test_get_resources(self):
+        """Test getting all resources"""
+        success, details, response = self.make_request('GET', 'structure/resources')
+        
+        if success and 'resources' in response:
+            resources = response['resources']
+            self.log_test("Get resources", True, f"Found {len(resources)} resources")
+            return resources
+        else:
+            self.log_test("Get resources", False, details)
             return []
+
+    def test_get_modules(self, resource_name):
+        """Test getting modules for a specific resource"""
+        success, details, response = self.make_request('GET', f'structure/resources/{resource_name}/modules')
+        
+        if success and 'modules' in response:
+            modules = response['modules']
+            self.log_test(f"Get modules for {resource_name}", True, f"Found {len(modules)} modules")
+            return modules
+        else:
+            self.log_test(f"Get modules for {resource_name}", False, details)
+            return []
+
+    def test_get_sessions(self, resource_name, module_name):
+        """Test getting sessions for a specific module"""
+        success, details, response = self.make_request('GET', f'structure/resources/{resource_name}/modules/{module_name}/sessions')
+        
+        if success and 'sessions' in response:
+            sessions = response['sessions']
+            session_types = [s.get('type', 'unknown') for s in sessions]
+            self.log_test(f"Get sessions for {resource_name}/{module_name}", True, 
+                         f"Found {len(sessions)} sessions (types: {', '.join(set(session_types))})")
+            return sessions
+        else:
+            self.log_test(f"Get sessions for {resource_name}/{module_name}", False, details)
+            return []
+
+    def test_invalid_structure_endpoints(self):
+        """Test structure endpoints with invalid parameters"""
+        # Test invalid resource
+        success, details, response = self.make_request('GET', 'structure/resources/InvalidResource/modules', expected_status=404)
+        self.log_test("Invalid resource rejection", success, details)
+        
+        # Test invalid module
+        success, details, response = self.make_request('GET', 'structure/resources/Youtube/modules/InvalidModule/sessions', expected_status=404)
+        self.log_test("Invalid module rejection", success, details)
 
     def test_get_users(self):
         """Test getting users list"""
@@ -122,66 +173,140 @@ class LearnTrackAPITester:
             return []
 
     def test_get_all_progress(self):
-        """Test getting all users' progress"""
+        """Test getting all users' progress in hierarchical format"""
         success, details, response = self.make_request('GET', 'progress')
         
         if success and 'progress' in response:
             progress = response['progress']
-            self.log_test("Get all progress", True, f"Found progress for {len(progress)} users")
-            return progress
+            # Validate hierarchical structure
+            if progress and len(progress) > 0:
+                user_progress = progress[0]
+                if 'resources' in user_progress:
+                    self.log_test("Get all progress (hierarchical)", True, 
+                                 f"Found hierarchical progress for {len(progress)} users")
+                    return progress
+                else:
+                    self.log_test("Get all progress (hierarchical)", False, "Progress not in hierarchical format")
+                    return []
+            else:
+                self.log_test("Get all progress (hierarchical)", True, "No progress data yet")
+                return progress
         else:
-            self.log_test("Get all progress", False, details)
+            self.log_test("Get all progress (hierarchical)", False, details)
             return []
 
     def test_get_my_progress(self):
-        """Test getting current user's progress"""
+        """Test getting current user's progress in hierarchical format"""
         success, details, response = self.make_request('GET', 'progress/me')
         
         if success and 'progress' in response:
             progress = response['progress']
-            self.log_test("Get my progress", True, f"Found {len(progress)} progress entries")
-            return progress
+            # Validate hierarchical structure
+            if progress and len(progress) > 0:
+                resource_progress = progress[0]
+                if 'modules' in resource_progress:
+                    self.log_test("Get my progress (hierarchical)", True, 
+                                 f"Found hierarchical progress with {len(progress)} resources")
+                    return progress
+                else:
+                    self.log_test("Get my progress (hierarchical)", False, "Progress not in hierarchical format")
+                    return []
+            else:
+                self.log_test("Get my progress (hierarchical)", True, "No progress data yet")
+                return progress
         else:
-            self.log_test("Get my progress", False, details)
+            self.log_test("Get my progress (hierarchical)", False, details)
             return []
 
-    def test_update_progress(self, level, completed):
-        """Test updating progress for a level"""
+    def test_update_progress(self, resource, module, session, completed):
+        """Test updating progress for hierarchical structure"""
         success, details, response = self.make_request(
             'POST', 'progress',
-            {'level': level, 'completed': completed}
+            {
+                'resource': resource,
+                'module': module, 
+                'session': session,
+                'completed': completed
+            }
         )
         
         action = "complete" if completed else "uncomplete"
-        self.log_test(f"Update progress - {action} {level}", success, details)
+        self.log_test(f"Update progress - {action} {resource}/{module}/{session}", success, details)
+        return success
+
+    def test_invalid_progress_update(self):
+        """Test updating progress with invalid resource/module/session"""
+        success, details, response = self.make_request(
+            'POST', 'progress',
+            {
+                'resource': 'InvalidResource',
+                'module': 'InvalidModule',
+                'session': 'InvalidSession',
+                'completed': True
+            },
+            expected_status=400
+        )
+        
+        self.log_test("Invalid progress update rejection", success, details)
         return success
 
     def test_get_notes(self):
-        """Test getting all notes"""
+        """Test getting all notes with hierarchical context"""
         success, details, response = self.make_request('GET', 'notes')
         
         if success and 'notes' in response:
             notes = response['notes']
-            self.log_test("Get notes", True, f"Found {len(notes)} notes")
-            return notes
+            # Validate hierarchical fields
+            if notes and len(notes) > 0:
+                note = notes[0]
+                has_hierarchy = all(field in note for field in ['resource', 'module', 'session'])
+                if has_hierarchy:
+                    self.log_test("Get notes (hierarchical)", True, f"Found {len(notes)} notes with hierarchical context")
+                else:
+                    self.log_test("Get notes (hierarchical)", False, "Notes missing hierarchical context")
+                return notes
+            else:
+                self.log_test("Get notes (hierarchical)", True, "No notes found")
+                return notes
         else:
-            self.log_test("Get notes", False, details)
+            self.log_test("Get notes (hierarchical)", False, details)
             return []
 
-    def test_create_note(self, level, content):
-        """Test creating a note"""
+    def test_create_note(self, resource, module, session, content):
+        """Test creating a note with hierarchical context"""
         success, details, response = self.make_request(
             'POST', 'notes',
-            {'level': level, 'content': content}
+            {
+                'resource': resource,
+                'module': module,
+                'session': session,
+                'content': content
+            }
         )
         
         if success and 'id' in response:
             note_id = response['id']
-            self.log_test("Create note", True, f"Created note with ID: {note_id}")
+            self.log_test(f"Create note for {resource}/{module}/{session}", True, f"Created note with ID: {note_id}")
             return note_id
         else:
-            self.log_test("Create note", False, details)
+            self.log_test(f"Create note for {resource}/{module}/{session}", False, details)
             return None
+
+    def test_invalid_note_creation(self):
+        """Test creating note with invalid resource/module/session"""
+        success, details, response = self.make_request(
+            'POST', 'notes',
+            {
+                'resource': 'InvalidResource',
+                'module': 'InvalidModule',
+                'session': 'InvalidSession',
+                'content': 'Test note'
+            },
+            expected_status=400
+        )
+        
+        self.log_test("Invalid note creation rejection", success, details)
+        return success
 
     def test_update_note(self, note_id, content):
         """Test updating a note"""
@@ -229,8 +354,8 @@ class LearnTrackAPITester:
 
     def run_comprehensive_test(self):
         """Run all tests in sequence"""
-        print("🚀 Starting LearnTrack API Testing Suite")
-        print("=" * 50)
+        print("🚀 Starting LearnTrack Hierarchical API Testing Suite")
+        print("=" * 60)
         
         # Test 1: Invalid login
         print("\n📋 Testing Authentication Security")
@@ -248,54 +373,97 @@ class LearnTrackAPITester:
         # Test 4: Unauthorized access
         self.test_unauthorized_access()
         
-        # Test 5: Configuration endpoints
-        print("\n📋 Testing Configuration Endpoints")
-        levels = self.test_get_levels()
-        users = self.test_get_users()
-        
-        if not levels:
-            print("❌ Cannot proceed without levels data")
+        # Test 5: Hierarchical Structure endpoints
+        print("\n📋 Testing Hierarchical Learning Structure")
+        structure = self.test_get_learning_structure()
+        if not structure:
+            print("❌ Cannot proceed without learning structure")
             return False
         
-        # Test 6: Progress endpoints
-        print("\n📋 Testing Progress Management")
+        resources = self.test_get_resources()
+        
+        # Test structure navigation
+        if resources and len(resources) > 0:
+            test_resource = resources[0]['name']
+            modules = self.test_get_modules(test_resource)
+            
+            if modules and len(modules) > 0:
+                test_module = modules[0]['name']
+                sessions = self.test_get_sessions(test_resource, test_module)
+        
+        # Test invalid structure endpoints
+        self.test_invalid_structure_endpoints()
+        
+        # Test 6: Configuration endpoints
+        print("\n📋 Testing Configuration Endpoints")
+        users = self.test_get_users()
+        
+        # Test 7: Hierarchical Progress endpoints
+        print("\n📋 Testing Hierarchical Progress Management")
         self.test_get_all_progress()
         my_progress = self.test_get_my_progress()
         
-        # Test progress update if we have levels
-        if levels:
-            test_level = levels[0]
-            self.test_update_progress(test_level, True)
-            self.test_update_progress(test_level, False)
+        # Test progress update with hierarchical structure
+        if structure and structure['resources']:
+            test_resource = structure['resources'][0]['name']
+            if structure['resources'][0]['modules']:
+                test_module = structure['resources'][0]['modules'][0]['name']
+                if structure['resources'][0]['modules'][0]['sessions']:
+                    test_session = structure['resources'][0]['modules'][0]['sessions'][0]['name']
+                    
+                    self.test_update_progress(test_resource, test_module, test_session, True)
+                    self.test_update_progress(test_resource, test_module, test_session, False)
         
-        # Test 7: Notes endpoints
-        print("\n📋 Testing Notes Management")
+        # Test invalid progress update
+        self.test_invalid_progress_update()
+        
+        # Test 8: Hierarchical Notes endpoints
+        print("\n📋 Testing Hierarchical Notes Management")
         self.test_get_notes()
         
-        # Create, update, and delete a test note
-        if levels:
-            test_level = levels[0]
-            note_id = self.test_create_note(test_level, "Test note content for API testing")
-            
-            if note_id:
-                self.test_update_note(note_id, "Updated test note content")
-                self.test_delete_note(note_id)
+        # Create, update, and delete a test note with hierarchical context
+        if structure and structure['resources']:
+            test_resource = structure['resources'][0]['name']
+            if structure['resources'][0]['modules']:
+                test_module = structure['resources'][0]['modules'][0]['name']
+                if structure['resources'][0]['modules'][0]['sessions']:
+                    test_session = structure['resources'][0]['modules'][0]['sessions'][0]['name']
+                    
+                    note_id = self.test_create_note(test_resource, test_module, test_session, 
+                                                   "Test note for hierarchical learning structure")
+                    
+                    if note_id:
+                        self.test_update_note(note_id, "Updated test note for hierarchical structure")
+                        self.test_delete_note(note_id)
         
-        # Test 8: Test with different user
+        # Test invalid note creation
+        self.test_invalid_note_creation()
+        
+        # Test 9: Test with different user
         print("\n📋 Testing Multi-User Functionality")
         if self.test_login("user1", "pass1"):
             self.test_get_my_progress()
             
-            # Test authorization - user1 shouldn't be able to modify admin's notes
-            # This is implicit in the note creation/update/delete tests
+            # Test creating note as different user
+            if structure and structure['resources']:
+                test_resource = structure['resources'][1]['name'] if len(structure['resources']) > 1 else structure['resources'][0]['name']
+                if structure['resources'][0]['modules']:
+                    test_module = structure['resources'][0]['modules'][0]['name']
+                    if structure['resources'][0]['modules'][0]['sessions']:
+                        test_session = structure['resources'][0]['modules'][0]['sessions'][0]['name']
+                        
+                        user1_note_id = self.test_create_note(test_resource, test_module, test_session, 
+                                                             "Note from user1 in hierarchical system")
+                        if user1_note_id:
+                            self.test_delete_note(user1_note_id)
         
         return True
 
     def print_summary(self):
         """Print test summary"""
-        print("\n" + "=" * 50)
-        print("📊 TEST SUMMARY")
-        print("=" * 50)
+        print("\n" + "=" * 60)
+        print("📊 HIERARCHICAL LEARNING STRUCTURE TEST SUMMARY")
+        print("=" * 60)
         
         print(f"Total Tests: {self.tests_run}")
         print(f"Passed: {self.tests_passed}")
@@ -309,19 +477,19 @@ class LearnTrackAPITester:
             for test in failed_tests:
                 print(f"  • {test['name']}: {test['details']}")
         
-        print("\n" + "=" * 50)
+        print("\n" + "=" * 60)
         
         return self.tests_passed == self.tests_run
 
 def main():
     """Main test execution"""
-    tester = LearnTrackAPITester()
+    tester = LearnTrackHierarchicalAPITester()
     
     try:
         success = tester.run_comprehensive_test()
-        tester.print_summary()
+        all_passed = tester.print_summary()
         
-        return 0 if success else 1
+        return 0 if all_passed else 1
         
     except Exception as e:
         print(f"❌ Test suite failed with error: {str(e)}")
