@@ -464,13 +464,20 @@ class LearnTrackHierarchicalAPITester:
         if self.test_login("user1", "pass1"):
             self.test_get_my_progress()
             
-            # Test creating note as different user
+            # Test creating note as different user - use Book resource
             if structure and structure['resources']:
-                test_resource = structure['resources'][1]['name'] if len(structure['resources']) > 1 else structure['resources'][0]['name']
-                if structure['resources'][0]['modules']:
-                    test_module = structure['resources'][0]['modules'][0]['name']
-                    if structure['resources'][0]['modules'][0]['sessions']:
-                        test_session = structure['resources'][0]['modules'][0]['sessions'][0]['name']
+                # Find Book resource for testing
+                book_resource = None
+                for resource in structure['resources']:
+                    if resource['name'] == 'Book':
+                        book_resource = resource
+                        break
+                
+                if book_resource and book_resource['modules']:
+                    test_resource = book_resource['name']
+                    test_module = book_resource['modules'][0]['name']
+                    if book_resource['modules'][0]['sessions']:
+                        test_session = book_resource['modules'][0]['sessions'][0]['name']
                         
                         user1_note_id = self.test_create_note(test_resource, test_module, test_session, 
                                                              "Note from user1 in hierarchical system")
