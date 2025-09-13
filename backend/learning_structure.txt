@@ -1,0 +1,60 @@
+Youtube
+    Module 1: Giới thiệu về HTML/CSS
+        Session 1: HTML cơ bản
+        Session 2: CSS căn bản
+        Lab 1: Tạo trang web đầu tiên
+    Module 2: JavaScript cơ bản
+        Session 1: Biến và hàm
+        Session 2: DOM Manipulation
+        Lab 1: Tạo calculator đơn giản
+        Session 3: Events và Forms
+    Module 3: Responsive Design
+        Session 1: Media Queries
+        Session 2: Flexbox
+        Session 3: Grid Layout
+        Lab 1: Thiết kế mobile-first
+
+Page
+    Module 1: React Basics
+        Session 1: JSX và Components
+        Session 2: Props và State
+        Lab 1: Todo App
+        Session 3: Event Handling
+    Module 2: Advanced React
+        Session 1: Hooks
+        Session 2: Context API
+        Session 3: Performance Optimization
+        Lab 1: E-commerce App
+    Module 3: React Router
+        Session 1: Basic Routing
+        Session 2: Dynamic Routes
+        Lab 1: Multi-page Application
+
+Book
+    Module 1: Backend Development
+        Session 1: Node.js Fundamentals
+        Session 2: Express.js Setup
+        Lab 1: REST API Development
+        Session 3: Database Integration
+    Module 2: Database Design
+        Session 1: SQL Basics
+        Session 2: NoSQL with MongoDB
+        Session 3: Database Relationships
+        Lab 1: Design a Blog Database
+    Module 3: Authentication & Security
+        Session 1: JWT Tokens
+        Session 2: Password Hashing
+        Session 3: Role-based Access
+        Lab 1: User Management System
+
+Video
+    Module 1: Deployment & DevOps
+        Session 1: Git Fundamentals
+        Session 2: Docker Basics
+        Lab 1: Containerize an App
+        Session 3: CI/CD Pipelines
+    Module 2: Cloud Services
+        Session 1: AWS Basics
+        Session 2: Heroku Deployment
+        Session 3: Database Hosting
+        Lab 1: Deploy Full-stack App
