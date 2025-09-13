@@ -263,6 +263,7 @@ const Dashboard = () => {
   const [structure, setStructure] = useState({ resources: [] });
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedUser, setExpandedUser] = useState(null); // State để track user nào đang được mở rộng
   const [activeTab, setActiveTab] = useState('overview');
   
   // Navigation states
