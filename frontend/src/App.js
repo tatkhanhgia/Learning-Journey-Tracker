@@ -365,7 +365,7 @@ const Dashboard = () => {
   const updateProgress = async (resource, module, session, completed) => {
     try {
       await axios.post(`${API}/progress`, { resource, module, session, completed });
-      await fetchData();
+      await fetchData(true); // Preserve navigation when updating progress
       toast.success(completed ? 'Đã đánh dấu hoàn thành' : 'Đã hủy đánh dấu hoàn thành');
     } catch (error) {
       console.error('Failed to update progress:', error);
