@@ -502,7 +502,7 @@ const Dashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab - All Users Progress */}
+          {/* Overview Tab - All Users Progress với Dropdown */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-6">
               <h2 className="text-2xl font-semibold text-slate-800">Tiến độ của tất cả thành viên</h2>
@@ -510,7 +510,10 @@ const Dashboard = () => {
               <div className="grid gap-4">
                 {allProgress.map((userProgress) => (
                   <Card key={userProgress.username} className="shadow-sm border-slate-200">
-                    <CardHeader className="pb-4">
+                    <CardHeader 
+                      className="pb-4 cursor-pointer hover:bg-slate-50 transition-colors"
+                      onClick={() => toggleUserExpansion(userProgress.username)}
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <Avatar className="w-10 h-10">
@@ -523,11 +526,18 @@ const Dashboard = () => {
                             <CardDescription>@{userProgress.username}</CardDescription>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-blue-600">
-                            {calculateProgressPercentage(userProgress)}%
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-blue-600">
+                              {calculateProgressPercentage(userProgress)}%
+                            </div>
+                            <div className="text-sm text-slate-500">Hoàn thành</div>
                           </div>
-                          <div className="text-sm text-slate-500">Hoàn thành</div>
+                          {expandedUser === userProgress.username ? (
+                            <ChevronDown className="w-5 h-5 text-slate-400" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5 text-slate-400" />
+                          )}
                         </div>
                       </div>
                       <Progress 
@@ -535,42 +545,46 @@ const Dashboard = () => {
                         className="mt-3"
                       />
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {userProgress.resources.map((resource) => (
-                          <div key={resource.name}>
-                            <h4 className="font-medium text-slate-700 mb-2">{resource.name}</h4>
-                            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 ml-4">
-                              {resource.modules.map((module) => (
-                                <div key={module.name} className="space-y-1">
-                                  <div className="text-sm font-medium text-slate-600">{module.name}</div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {module.sessions.map((session) => (
-                                      <div
-                                        key={session.name}
-                                        className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
-                                          session.completed
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-slate-100 text-slate-600'
-                                        }`}
-                                      >
-                                        {session.type === 'lab' ? (
-                                          <FlaskConical className="w-3 h-3" />
-                                        ) : (
-                                          <Play className="w-3 h-3" />
-                                        )}
-                                        <span>{session.name}</span>
-                                        {session.completed && <CheckCircle2 className="w-3 h-3" />}
-                                      </div>
-                                    ))}
+                    
+                    {/* Chỉ hiển thị progress details khi user được expand */}
+                    {expandedUser === userProgress.username && (
+                      <CardContent>
+                        <div className="space-y-4">
+                          {userProgress.resources.map((resource) => (
+                            <div key={resource.name}>
+                              <h4 className="font-medium text-slate-700 mb-2">{resource.name}</h4>
+                              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 ml-4">
+                                {resource.modules.map((module) => (
+                                  <div key={module.name} className="space-y-1">
+                                    <div className="text-sm font-medium text-slate-600">{module.name}</div>
+                                    <div className="flex flex-wrap gap-1">
+                                      {module.sessions.map((session) => (
+                                        <div
+                                          key={session.name}
+                                          className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
+                                            session.completed
+                                              ? 'bg-green-100 text-green-700'
+                                              : 'bg-slate-100 text-slate-600'
+                                          }`}
+                                        >
+                                          {session.type === 'lab' ? (
+                                            <FlaskConical className="w-3 h-3" />
+                                          ) : (
+                                            <Play className="w-3 h-3" />
+                                          )}
+                                          <span>{session.name}</span>
+                                          {session.completed && <CheckCircle2 className="w-3 h-3" />}
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
+                          ))}
+                        </div>
+                      </CardContent>
+                    )}
                   </Card>
                 ))}
               </div>
