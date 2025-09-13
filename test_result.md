@@ -247,6 +247,7 @@ metadata:
 test_plan:
   current_focus:
     - "Update progress tracking UI for hierarchical structure"
+    - "Implement dropdown-style progress overview"
   stuck_tasks:
     - "Update progress tracking UI for hierarchical structure"
   test_all: false
