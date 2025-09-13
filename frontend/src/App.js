@@ -432,6 +432,11 @@ const Dashboard = () => {
     return totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
   };
 
+  // Function để toggle dropdown của user
+  const toggleUserExpansion = (username) => {
+    setExpandedUser(expandedUser === username ? null : username);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
