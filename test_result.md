@@ -101,3 +101,127 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Thiết kế lại trang tiến độ thành cấu trúc phân cấp 3 tầng: Resources → Modules → Sessions. Dữ liệu được định nghĩa trong file txt với thụt lề. Giao diện có breadcrumb và navigation phân cấp."
+
+backend:
+  - task: "Parse learning structure from hierarchical txt file"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implemented parse_learning_structure() function to parse indented structure from learning_structure.txt. Supports both spaces and tabs."
+  
+  - task: "Create hierarchical API endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created /api/structure endpoints: /structure, /structure/resources, /structure/resources/{resource}/modules, /structure/resources/{resource}/modules/{module}/sessions"
+
+  - task: "Update progress tracking for 3-level hierarchy"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Updated Progress model and endpoints to track resource/module/session instead of just level. Progress API now supports hierarchical structure."
+
+  - task: "Update notes system for hierarchical structure"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Updated Note model and endpoints to reference resource/module/session. Notes API now validates against hierarchical structure."
+
+frontend:
+  - task: "Implement hierarchical navigation with Resources → Modules → Sessions"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Created hierarchical navigation system with currentView state (resources/modules/sessions) and navigationPath array for breadcrumb tracking."
+
+  - task: "Add breadcrumb navigation"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Implemented Breadcrumb component with Home icon and clickable navigation path. Users can click on any breadcrumb level to navigate back."
+
+  - task: "Update progress tracking UI for hierarchical structure"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Updated progress tracking to work with resource/module/session hierarchy. Added visual indicators for session types (Play icon for sessions, Flask icon for labs)."
+
+  - task: "Update notes UI for hierarchical selection"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Updated note creation dialog with cascading dropdowns: Resource → Module → Session. Added badges to display hierarchical context in note list."
+
+metadata:
+  created_by: "main_agent"
+  version: "2.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Parse learning structure from hierarchical txt file"
+    - "Create hierarchical API endpoints"
+    - "Update progress tracking for 3-level hierarchy"
+    - "Update notes system for hierarchical structure"
+    - "Implement hierarchical navigation with Resources → Modules → Sessions"
+    - "Add breadcrumb navigation"
+    - "Update progress tracking UI for hierarchical structure"
+    - "Update notes UI for hierarchical selection"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Completed implementation of hierarchical learning structure. Created new learning_structure.txt with 4 resources (Youtube, Page, Book, Video), each containing multiple modules and sessions. Backend now parses indented structure and provides hierarchical APIs. Frontend implements 3-level navigation with breadcrumbs. Ready for comprehensive testing."
