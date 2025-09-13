@@ -7,11 +7,11 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone, timedelta
 import jwt
-import re
+import hashlib
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -27,7 +27,7 @@ JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Create the main app without a prefix
-app = FastAPI(title="LearnTrack API - Hierarchical")
+app = FastAPI(title="LearnTrack API")
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -50,27 +50,10 @@ class User(BaseModel):
     username: str
     full_name: str
 
-class Session(BaseModel):
-    name: str
-    type: str  # "session" or "lab"
-
-class Module(BaseModel):
-    name: str
-    sessions: List[Session]
-
-class Resource(BaseModel):
-    name: str
-    modules: List[Module]
-
-class LearningStructure(BaseModel):
-    resources: List[Resource]
-
 class Progress(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     username: str
-    resource: str
-    module: str
-    session: str
+    level: str
     completed: bool = False
     completed_at: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -78,23 +61,17 @@ class Progress(BaseModel):
 class Note(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     username: str
-    resource: str
-    module: str
-    session: str
+    level: str
     content: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None
 
 class ProgressUpdate(BaseModel):
-    resource: str
-    module: str
-    session: str
+    level: str
     completed: bool
 
 class NoteCreate(BaseModel):
-    resource: str
-    module: str
-    session: str
+    level: str
     content: str
 
 class NoteUpdate(BaseModel):
@@ -120,57 +97,18 @@ def load_users():
         logger.error("users.txt file not found")
     return users
 
-def parse_learning_structure():
-    """Parse the hierarchical learning structure from learning_structure.txt"""
-    resources = []
-    current_resource = None
-    current_module = None
-    
+def load_levels():
+    """Load levels from levels.txt file"""
+    levels = []
     try:
-        with open(ROOT_DIR / 'learning_structure.txt', 'r', encoding='utf-8') as f:
+        with open(ROOT_DIR / 'levels.txt', 'r', encoding='utf-8') as f:
             for line in f:
-                # Handle both spaces and tabs for indentation
-                original_line = line
-                line = line.rstrip()
-                
-                if not line:
-                    continue
-                
-                # Count indentation (convert tabs to 4 spaces for consistency)
-                expanded_line = original_line.expandtabs(4)
-                indent_level = len(expanded_line) - len(expanded_line.lstrip())
-                content = line.strip()
-                
-                if indent_level == 0:
-                    # This is a resource
-                    if current_resource:
-                        resources.append(current_resource)
-                    current_resource = Resource(name=content, modules=[])
-                    current_module = None
-                    
-                elif indent_level <= 4:
-                    # This is a module
-                    if current_resource:
-                        if current_module:
-                            current_resource.modules.append(current_module)
-                        current_module = Module(name=content, sessions=[])
-                        
-                elif indent_level <= 8:
-                    # This is a session
-                    if current_module:
-                        session_type = "lab" if content.lower().startswith("lab") else "session"
-                        current_module.sessions.append(Session(name=content, type=session_type))
-            
-            # Don't forget the last resource and module
-            if current_module and current_resource:
-                current_resource.modules.append(current_module)
-            if current_resource:
-                resources.append(current_resource)
-                
+                line = line.strip()
+                if line:
+                    levels.append(line)
     except FileNotFoundError:
-        logger.error("learning_structure.txt file not found")
-    
-    return LearningStructure(resources=resources)
+        logger.error("levels.txt file not found")
+    return levels
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
@@ -270,56 +208,12 @@ async def get_current_user(current_user: str = Depends(verify_token)):
         "full_name": users[current_user]['full_name']
     }
 
-# Structure endpoints
-@api_router.get("/structure", response_model=LearningStructure)
-async def get_learning_structure():
-    """Get the complete learning structure"""
-    return parse_learning_structure()
-
-@api_router.get("/structure/resources")
-async def get_resources():
-    """Get all resources"""
-    structure = parse_learning_structure()
-    return {"resources": [{"name": resource.name} for resource in structure.resources]}
-
-@api_router.get("/structure/resources/{resource_name}/modules")
-async def get_modules(resource_name: str):
-    """Get modules for a specific resource"""
-    structure = parse_learning_structure()
-    
-    for resource in structure.resources:
-        if resource.name == resource_name:
-            return {
-                "resource": resource_name,
-                "modules": [{"name": module.name} for module in resource.modules]
-            }
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Resource not found"
-    )
-
-@api_router.get("/structure/resources/{resource_name}/modules/{module_name}/sessions")
-async def get_sessions(resource_name: str, module_name: str):
-    """Get sessions for a specific module"""
-    structure = parse_learning_structure()
-    
-    for resource in structure.resources:
-        if resource.name == resource_name:
-            for module in resource.modules:
-                if module.name == module_name:
-                    return {
-                        "resource": resource_name,
-                        "module": module_name,
-                        "sessions": [{"name": session.name, "type": session.type} for session in module.sessions]
-                    }
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Resource or module not found"
-    )
-
 # Configuration endpoints
+@api_router.get("/config/levels")
+async def get_levels():
+    levels = load_levels()
+    return {"levels": levels}
+
 @api_router.get("/config/users")
 async def get_users(current_user: str = Depends(verify_token)):
     users = load_users()
@@ -333,13 +227,13 @@ async def get_users(current_user: str = Depends(verify_token)):
 @api_router.get("/progress")
 async def get_all_progress(current_user: str = Depends(verify_token)):
     progress_docs = await db.progress.find().to_list(1000)
+    levels = load_levels()
     users = load_users()
-    structure = parse_learning_structure()
     
     # Create a dictionary for easy lookup
     progress_dict = {}
     for doc in progress_docs:
-        key = f"{doc['username']}_{doc['resource']}_{doc['module']}_{doc['session']}"
+        key = f"{doc['username']}_{doc['level']}"
         progress_dict[key] = parse_from_mongo(doc)
     
     # Build complete progress matrix
@@ -348,42 +242,24 @@ async def get_all_progress(current_user: str = Depends(verify_token)):
         user_progress = {
             "username": username,
             "full_name": user_data['full_name'],
-            "resources": []
+            "levels": []
         }
         
-        for resource in structure.resources:
-            resource_progress = {
-                "name": resource.name,
-                "modules": []
-            }
-            
-            for module in resource.modules:
-                module_progress = {
-                    "name": module.name,
-                    "sessions": []
-                }
-                
-                for session in module.sessions:
-                    key = f"{username}_{resource.name}_{module.name}_{session.name}"
-                    if key in progress_dict:
-                        progress_data = progress_dict[key]
-                        module_progress["sessions"].append({
-                            "name": session.name,
-                            "type": session.type,
-                            "completed": progress_data.get('completed', False),
-                            "completed_at": progress_data.get('completed_at')
-                        })
-                    else:
-                        module_progress["sessions"].append({
-                            "name": session.name,
-                            "type": session.type,
-                            "completed": False,
-                            "completed_at": None
-                        })
-                
-                resource_progress["modules"].append(module_progress)
-            
-            user_progress["resources"].append(resource_progress)
+        for level in levels:
+            key = f"{username}_{level}"
+            if key in progress_dict:
+                progress_data = progress_dict[key]
+                user_progress["levels"].append({
+                    "level": level,
+                    "completed": progress_data.get('completed', False),
+                    "completed_at": progress_data.get('completed_at')
+                })
+            else:
+                user_progress["levels"].append({
+                    "level": level,
+                    "completed": False,
+                    "completed_at": None
+                })
         
         result.append(user_progress)
     
@@ -392,85 +268,44 @@ async def get_all_progress(current_user: str = Depends(verify_token)):
 @api_router.get("/progress/me")
 async def get_my_progress(current_user: str = Depends(verify_token)):
     progress_docs = await db.progress.find({"username": current_user}).to_list(1000)
-    structure = parse_learning_structure()
+    levels = load_levels()
     
-    progress_dict = {}
-    for doc in progress_docs:
-        key = f"{doc['resource']}_{doc['module']}_{doc['session']}"
-        progress_dict[key] = parse_from_mongo(doc)
+    progress_dict = {doc['level']: parse_from_mongo(doc) for doc in progress_docs}
     
     result = []
-    for resource in structure.resources:
-        resource_progress = {
-            "name": resource.name,
-            "modules": []
-        }
-        
-        for module in resource.modules:
-            module_progress = {
-                "name": module.name,
-                "sessions": []
-            }
-            
-            for session in module.sessions:
-                key = f"{resource.name}_{module.name}_{session.name}"
-                if key in progress_dict:
-                    progress_data = progress_dict[key]
-                    module_progress["sessions"].append({
-                        "name": session.name,
-                        "type": session.type,
-                        "completed": progress_data.get('completed', False),
-                        "completed_at": progress_data.get('completed_at')
-                    })
-                else:
-                    module_progress["sessions"].append({
-                        "name": session.name,
-                        "type": session.type,
-                        "completed": False,
-                        "completed_at": None
-                    })
-            
-            resource_progress["modules"].append(module_progress)
-        
-        result.append(resource_progress)
+    for level in levels:
+        if level in progress_dict:
+            progress_data = progress_dict[level]
+            result.append({
+                "level": level,
+                "completed": progress_data.get('completed', False),
+                "completed_at": progress_data.get('completed_at')
+            })
+        else:
+            result.append({
+                "level": level,
+                "completed": False,
+                "completed_at": None
+            })
     
     return {"progress": result}
 
 @api_router.post("/progress")
 async def update_progress(update: ProgressUpdate, current_user: str = Depends(verify_token)):
-    # Validate that the resource/module/session exists
-    structure = parse_learning_structure()
-    found = False
-    
-    for resource in structure.resources:
-        if resource.name == update.resource:
-            for module in resource.modules:
-                if module.name == update.module:
-                    for session in module.sessions:
-                        if session.name == update.session:
-                            found = True
-                            break
-    
-    if not found:
+    levels = load_levels()
+    if update.level not in levels:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid resource, module, or session"
+            detail="Invalid level"
         )
     
     # Check if progress record exists
-    existing = await db.progress.find_one({
-        "username": current_user,
-        "resource": update.resource,
-        "module": update.module,
-        "session": update.session
-    })
+    existing = await db.progress.find_one({"username": current_user, "level": update.level})
     
     now = datetime.now(timezone.utc)
     progress_data = {
         "username": current_user,
-        "resource": update.resource,
-        "module": update.module,
-        "session": update.session,
+        "level": update.level,
         "completed": update.completed,
         "completed_at": now.isoformat() if update.completed else None,
         "created_at": existing['created_at'] if existing else now.isoformat()
@@ -478,12 +313,7 @@ async def update_progress(update: ProgressUpdate, current_user: str = Depends(ve
     
     if existing:
         await db.progress.update_one(
-            {
-                "username": current_user,
-                "resource": update.resource,
-                "module": update.module,
-                "session": update.session
-            },
+            {"username": current_user, "level": update.level},
             {"$set": progress_data}
         )
     else:
@@ -506,9 +336,7 @@ async def get_notes(current_user: str = Depends(verify_token)):
             "id": note_data['id'],
             "username": note_data['username'],
             "user_full_name": user_full_name,
-            "resource": note_data['resource'],
-            "module": note_data['module'],
-            "session": note_data['session'],
+            "level": note_data['level'],
             "content": note_data['content'],
             "created_at": note_data['created_at'],
             "updated_at": note_data.get('updated_at')
@@ -518,31 +346,17 @@ async def get_notes(current_user: str = Depends(verify_token)):
 
 @api_router.post("/notes")
 async def create_note(note: NoteCreate, current_user: str = Depends(verify_token)):
-    # Validate that the resource/module/session exists
-    structure = parse_learning_structure()
-    found = False
-    
-    for resource in structure.resources:
-        if resource.name == note.resource:
-            for module in resource.modules:
-                if module.name == note.module:
-                    for session in module.sessions:
-                        if session.name == note.session:
-                            found = True
-                            break
-    
-    if not found:
+    levels = load_levels()
+    if note.level not in levels:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid resource, module, or session"
+            detail="Invalid level"
         )
     
     note_data = {
         "id": str(uuid.uuid4()),
         "username": current_user,
-        "resource": note.resource,
-        "module": note.module,
-        "session": note.session,
+        "level": note.level,
         "content": note.content,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
