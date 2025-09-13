@@ -279,7 +279,7 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (preserveNavigation = false) => {
     try {
       setLoading(true);
       const [progressRes, myProgressRes, notesRes, structureRes, usersRes] = await Promise.all([
@@ -296,13 +296,37 @@ const Dashboard = () => {
       setStructure(structureRes.data);
       setUsers(usersRes.data.users);
       
-      // Set initial current data to resources
-      setCurrentData(structureRes.data.resources || []);
+      // Only set initial current data to resources if we're not preserving navigation
+      if (!preserveNavigation) {
+        setCurrentData(structureRes.data.resources || []);
+      } else {
+        // Preserve current navigation by re-applying the navigation path
+        refreshCurrentView(structureRes.data);
+      }
     } catch (error) {
       console.error('Failed to fetch data:', error);
       toast.error('Không thể tải dữ liệu');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshCurrentView = (structureData) => {
+    // Re-apply current navigation to preserve view after data refresh
+    if (navigationPath.length === 0) {
+      setCurrentView('resources');
+      setCurrentData(structureData.resources || []);
+    } else if (navigationPath.length === 1) {
+      // Show modules for selected resource
+      const resource = structureData.resources.find(r => r.name === navigationPath[0].name);
+      setCurrentView('modules');
+      setCurrentData(resource ? resource.modules : []);
+    } else if (navigationPath.length === 2) {
+      // Show sessions for selected module
+      const resource = structureData.resources.find(r => r.name === navigationPath[0].name);
+      const module = resource ? resource.modules.find(m => m.name === navigationPath[1].name) : null;
+      setCurrentView('sessions');
+      setCurrentData(module ? module.sessions : []);
     }
   };
 
