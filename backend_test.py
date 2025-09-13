@@ -409,13 +409,20 @@ class LearnTrackHierarchicalAPITester:
         self.test_get_all_progress()
         my_progress = self.test_get_my_progress()
         
-        # Test progress update with hierarchical structure
+        # Test progress update with hierarchical structure - use Page resource
         if structure and structure['resources']:
-            test_resource = structure['resources'][0]['name']
-            if structure['resources'][0]['modules']:
-                test_module = structure['resources'][0]['modules'][0]['name']
-                if structure['resources'][0]['modules'][0]['sessions']:
-                    test_session = structure['resources'][0]['modules'][0]['sessions'][0]['name']
+            # Find Page resource for testing
+            page_resource = None
+            for resource in structure['resources']:
+                if resource['name'] == 'Page':
+                    page_resource = resource
+                    break
+            
+            if page_resource and page_resource['modules']:
+                test_resource = page_resource['name']
+                test_module = page_resource['modules'][0]['name']
+                if page_resource['modules'][0]['sessions']:
+                    test_session = page_resource['modules'][0]['sessions'][0]['name']
                     
                     self.test_update_progress(test_resource, test_module, test_session, True)
                     self.test_update_progress(test_resource, test_module, test_session, False)
