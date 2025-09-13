@@ -392,7 +392,7 @@ const Dashboard = () => {
       setIsNoteDialogOpen(false);
       setNoteForm({ resource: '', module: '', session: '', content: '' });
       setEditingNote(null);
-      await fetchData();
+      await fetchData(true); // Preserve navigation when updating notes
     } catch (error) {
       console.error('Failed to save note:', error);
       toast.error('Không thể lưu ghi chú');
