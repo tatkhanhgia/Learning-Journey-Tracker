@@ -111,11 +111,14 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
         comment: "Implemented parse_learning_structure() function to parse indented structure from learning_structure.txt. Supports both spaces and tabs."
+      - working: true
+        agent: "testing"
+        comment: "✅ TESTED: Learning structure parsing works perfectly. Successfully parsed 4 resources (Youtube, Page, Book, Video) with multiple modules and sessions. Structure API returns complete hierarchical data with proper session types (session/lab)."
   
   - task: "Create hierarchical API endpoints"
     implemented: true
