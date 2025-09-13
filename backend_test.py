@@ -434,13 +434,20 @@ class LearnTrackHierarchicalAPITester:
         print("\n📋 Testing Hierarchical Notes Management")
         self.test_get_notes()
         
-        # Create, update, and delete a test note with hierarchical context
+        # Create, update, and delete a test note with hierarchical context - use Page resource
         if structure and structure['resources']:
-            test_resource = structure['resources'][0]['name']
-            if structure['resources'][0]['modules']:
-                test_module = structure['resources'][0]['modules'][0]['name']
-                if structure['resources'][0]['modules'][0]['sessions']:
-                    test_session = structure['resources'][0]['modules'][0]['sessions'][0]['name']
+            # Find Page resource for testing
+            page_resource = None
+            for resource in structure['resources']:
+                if resource['name'] == 'Page':
+                    page_resource = resource
+                    break
+            
+            if page_resource and page_resource['modules']:
+                test_resource = page_resource['name']
+                test_module = page_resource['modules'][0]['name']
+                if page_resource['modules'][0]['sessions']:
+                    test_session = page_resource['modules'][0]['sessions'][0]['name']
                     
                     note_id = self.test_create_note(test_resource, test_module, test_session, 
                                                    "Test note for hierarchical learning structure")
