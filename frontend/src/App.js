@@ -405,7 +405,7 @@ const Dashboard = () => {
     try {
       await axios.delete(`${API}/notes/${noteId}`);
       toast.success('Đã xóa ghi chú');
-      await fetchData();
+      await fetchData(true); // Preserve navigation when deleting notes
     } catch (error) {
       console.error('Failed to delete note:', error);
       toast.error('Không thể xóa ghi chú');
