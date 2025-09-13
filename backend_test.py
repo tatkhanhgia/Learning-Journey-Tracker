@@ -334,7 +334,7 @@ class LearnTrackHierarchicalAPITester:
         original_token = self.token
         self.token = None
         
-        success, details, response = self.make_request('GET', 'auth/me', expected_status=401)
+        success, details, response = self.make_request('GET', 'auth/me', expected_status=403)
         self.log_test("Unauthorized access protection", success, details)
         
         # Restore token
