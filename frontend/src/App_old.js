@@ -23,12 +23,7 @@ import {
   Plus,
   Edit3,
   Trash2,
-  User,
-  ChevronRight,
-  ArrowLeft,
-  Home,
-  Play,
-  FlaskConical
+  User
 } from 'lucide-react';
 import './App.css';
 
@@ -125,7 +120,7 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-// Login Component (unchanged)
+// Login Component
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -136,7 +131,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    setErrorMessage(''); // Clear previous errors
     
     if (!username || !password) {
       setErrorMessage('Vui lòng nhập đầy đủ thông tin');
@@ -194,6 +189,7 @@ const LoginPage = () => {
                 />
               </div>
               
+              {/* Error Message Display */}
               {errorMessage && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                   <p className="text-sm text-red-600 text-center">{errorMessage}</p>
@@ -225,54 +221,20 @@ const LoginPage = () => {
   );
 };
 
-// Breadcrumb Component
-const Breadcrumb = ({ items, onNavigate }) => {
-  return (
-    <nav className="flex items-center space-x-2 text-sm text-slate-600 mb-6">
-      <button 
-        onClick={() => onNavigate([])}
-        className="flex items-center gap-1 hover:text-blue-600 transition-colors"
-      >
-        <Home className="w-4 h-4" />
-        <span>Trang chủ</span>
-      </button>
-      
-      {items.map((item, index) => (
-        <React.Fragment key={index}>
-          <ChevronRight className="w-4 h-4" />
-          <button
-            onClick={() => onNavigate(items.slice(0, index + 1))}
-            className={`hover:text-blue-600 transition-colors ${
-              index === items.length - 1 ? 'text-slate-800 font-medium' : ''
-            }`}
-          >
-            {item.name}
-          </button>
-        </React.Fragment>
-      ))}
-    </nav>
-  );
-};
-
-// Dashboard Component with Hierarchical Navigation
+// Dashboard Component
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const [allProgress, setAllProgress] = useState([]);
   const [myProgress, setMyProgress] = useState([]);
   const [notes, setNotes] = useState([]);
-  const [structure, setStructure] = useState({ resources: [] });
+  const [levels, setLevels] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
-  
-  // Navigation states
-  const [navigationPath, setNavigationPath] = useState([]); // Array of {type: 'resource'|'module'|'session', name: string, data: object}
-  const [currentView, setCurrentView] = useState('resources'); // 'resources' | 'modules' | 'sessions'
-  const [currentData, setCurrentData] = useState([]);
 
   // Note dialog states
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
-  const [noteForm, setNoteForm] = useState({ resource: '', module: '', session: '', content: '' });
+  const [noteForm, setNoteForm] = useState({ level: '', content: '' });
   const [editingNote, setEditingNote] = useState(null);
 
   useEffect(() => {
@@ -282,22 +244,19 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [progressRes, myProgressRes, notesRes, structureRes, usersRes] = await Promise.all([
+      const [progressRes, myProgressRes, notesRes, levelsRes, usersRes] = await Promise.all([
         axios.get(`${API}/progress`),
         axios.get(`${API}/progress/me`),
         axios.get(`${API}/notes`),
-        axios.get(`${API}/structure`),
+        axios.get(`${API}/config/levels`),
         axios.get(`${API}/config/users`)
       ]);
 
       setAllProgress(progressRes.data.progress);
       setMyProgress(myProgressRes.data.progress);
       setNotes(notesRes.data.notes);
-      setStructure(structureRes.data);
+      setLevels(levelsRes.data.levels);
       setUsers(usersRes.data.users);
-      
-      // Set initial current data to resources
-      setCurrentData(structureRes.data.resources || []);
     } catch (error) {
       console.error('Failed to fetch data:', error);
       toast.error('Không thể tải dữ liệu');
@@ -306,41 +265,9 @@ const Dashboard = () => {
     }
   };
 
-  const handleNavigation = (path) => {
-    setNavigationPath(path);
-    
-    if (path.length === 0) {
-      // Back to resources
-      setCurrentView('resources');
-      setCurrentData(structure.resources || []);
-    } else if (path.length === 1) {
-      // Show modules for selected resource
-      const resource = structure.resources.find(r => r.name === path[0].name);
-      setCurrentView('modules');
-      setCurrentData(resource ? resource.modules : []);
-    } else if (path.length === 2) {
-      // Show sessions for selected module
-      const resource = structure.resources.find(r => r.name === path[0].name);
-      const module = resource ? resource.modules.find(m => m.name === path[1].name) : null;
-      setCurrentView('sessions');
-      setCurrentData(module ? module.sessions : []);
-    }
-  };
-
-  const handleItemClick = (item) => {
-    if (currentView === 'resources') {
-      const newPath = [{ type: 'resource', name: item.name, data: item }];
-      handleNavigation(newPath);
-    } else if (currentView === 'modules') {
-      const newPath = [...navigationPath, { type: 'module', name: item.name, data: item }];
-      handleNavigation(newPath);
-    }
-    // Sessions are leaf nodes, no further navigation
-  };
-
-  const updateProgress = async (resource, module, session, completed) => {
+  const updateProgress = async (level, completed) => {
     try {
-      await axios.post(`${API}/progress`, { resource, module, session, completed });
+      await axios.post(`${API}/progress`, { level, completed });
       await fetchData();
       toast.success(completed ? 'Đã đánh dấu hoàn thành' : 'Đã hủy đánh dấu hoàn thành');
     } catch (error) {
@@ -351,7 +278,7 @@ const Dashboard = () => {
 
   const handleNoteSubmit = async (e) => {
     e.preventDefault();
-    if (!noteForm.resource || !noteForm.module || !noteForm.session || !noteForm.content.trim()) {
+    if (!noteForm.level || !noteForm.content.trim()) {
       toast.error('Vui lòng điền đầy đủ thông tin');
       return;
     }
@@ -366,7 +293,7 @@ const Dashboard = () => {
       }
       
       setIsNoteDialogOpen(false);
-      setNoteForm({ resource: '', module: '', session: '', content: '' });
+      setNoteForm({ level: '', content: '' });
       setEditingNote(null);
       await fetchData();
     } catch (error) {
@@ -388,22 +315,9 @@ const Dashboard = () => {
     }
   };
 
-  const calculateProgressPercentage = (userProgress) => {
-    let totalSessions = 0;
-    let completedSessions = 0;
-    
-    userProgress.resources.forEach(resource => {
-      resource.modules.forEach(module => {
-        module.sessions.forEach(session => {
-          totalSessions++;
-          if (session.completed) {
-            completedSessions++;
-          }
-        });
-      });
-    });
-    
-    return totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
+  const getProgressPercentage = (userProgress) => {
+    const completedLevels = userProgress.levels.filter(level => level.completed).length;
+    return levels.length > 0 ? Math.round((completedLevels / levels.length) * 100) : 0;
   };
 
   if (loading) {
@@ -471,7 +385,7 @@ const Dashboard = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab - All Users Progress */}
+          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-6">
               <h2 className="text-2xl font-semibold text-slate-800">Tiến độ của tất cả thành viên</h2>
@@ -494,48 +408,37 @@ const Dashboard = () => {
                         </div>
                         <div className="text-right">
                           <div className="text-2xl font-bold text-blue-600">
-                            {calculateProgressPercentage(userProgress)}%
+                            {getProgressPercentage(userProgress)}%
                           </div>
                           <div className="text-sm text-slate-500">Hoàn thành</div>
                         </div>
                       </div>
                       <Progress 
-                        value={calculateProgressPercentage(userProgress)} 
+                        value={getProgressPercentage(userProgress)} 
                         className="mt-3"
                       />
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-4">
-                        {userProgress.resources.map((resource) => (
-                          <div key={resource.name}>
-                            <h4 className="font-medium text-slate-700 mb-2">{resource.name}</h4>
-                            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 ml-4">
-                              {resource.modules.map((module) => (
-                                <div key={module.name} className="space-y-1">
-                                  <div className="text-sm font-medium text-slate-600">{module.name}</div>
-                                  <div className="flex flex-wrap gap-1">
-                                    {module.sessions.map((session) => (
-                                      <div
-                                        key={session.name}
-                                        className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
-                                          session.completed
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-slate-100 text-slate-600'
-                                        }`}
-                                      >
-                                        {session.type === 'lab' ? (
-                                          <FlaskConical className="w-3 h-3" />
-                                        ) : (
-                                          <Play className="w-3 h-3" />
-                                        )}
-                                        <span>{session.name}</span>
-                                        {session.completed && <CheckCircle2 className="w-3 h-3" />}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {userProgress.levels.map((level) => (
+                          <div
+                            key={`${userProgress.username}-${level.level}`}
+                            className={`flex items-center gap-2 p-3 rounded-lg border ${
+                              level.completed
+                                ? 'bg-green-50 border-green-200'
+                                : 'bg-slate-50 border-slate-200'
+                            }`}
+                          >
+                            {level.completed ? (
+                              <CheckCircle2 className="w-5 h-5 text-green-600" />
+                            ) : (
+                              <Circle className="w-5 h-5 text-slate-400" />
+                            )}
+                            <span className={`text-sm font-medium ${
+                              level.completed ? 'text-green-800' : 'text-slate-600'
+                            }`}>
+                              {level.level}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -546,133 +449,59 @@ const Dashboard = () => {
             </div>
           </TabsContent>
 
-          {/* My Progress Tab - Hierarchical Navigation */}
+          {/* My Progress Tab */}
           <TabsContent value="my-progress" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-slate-800">Tiến độ của tôi</h2>
               <div className="text-right">
                 <div className="text-3xl font-bold text-blue-600">
-                  {myProgress.length > 0 ? calculateProgressPercentage({ resources: myProgress }) : 0}%
+                  {myProgress.length > 0 ? Math.round((myProgress.filter(p => p.completed).length / myProgress.length) * 100) : 0}%
                 </div>
                 <div className="text-sm text-slate-500">Hoàn thành</div>
               </div>
             </div>
 
-            <Breadcrumb items={navigationPath} onNavigate={handleNavigation} />
-
             <Card className="shadow-sm border-slate-200">
               <CardContent className="p-6">
-                {currentView === 'resources' && (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {currentData.map((resource) => (
-                      <div
-                        key={resource.name}
-                        onClick={() => handleItemClick(resource)}
-                        className="p-4 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-medium text-slate-800">{resource.name}</h3>
-                          <ChevronRight className="w-5 h-5 text-slate-400" />
-                        </div>
-                        <p className="text-sm text-slate-600">{resource.modules.length} modules</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {currentView === 'modules' && (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {currentData.map((module) => (
-                      <div
-                        key={module.name}
-                        onClick={() => handleItemClick(module)}
-                        className="p-4 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-medium text-slate-800">{module.name}</h3>
-                          <ChevronRight className="w-5 h-5 text-slate-400" />
-                        </div>
-                        <p className="text-sm text-slate-600">{module.sessions.length} sessions</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {currentView === 'sessions' && (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {currentData.map((session) => {
-                      // Find the session progress in myProgress
-                      const resourceName = navigationPath[0]?.name;
-                      const moduleName = navigationPath[1]?.name;
-                      const resourceProgress = myProgress.find(r => r.name === resourceName);
-                      const moduleProgress = resourceProgress?.modules.find(m => m.name === moduleName);
-                      const sessionProgress = moduleProgress?.sessions.find(s => s.name === session.name);
-                      
-                      return (
-                        <div
-                          key={session.name}
-                          className={`p-4 rounded-lg border transition-all ${
-                            sessionProgress?.completed
-                              ? 'bg-green-50 border-green-200'
-                              : 'bg-white border-slate-200 hover:border-blue-300'
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {myProgress.map((level) => (
+                    <div
+                      key={level.level}
+                      className={`p-4 rounded-lg border transition-all ${
+                        level.completed
+                          ? 'bg-green-50 border-green-200'
+                          : 'bg-white border-slate-200 hover:border-blue-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className={`font-medium ${
+                          level.completed ? 'text-green-800' : 'text-slate-700'
+                        }`}>
+                          {level.level}
+                        </span>
+                        <button
+                          onClick={() => updateProgress(level.level, !level.completed)}
+                          className={`p-1.5 rounded-full transition-colors ${
+                            level.completed
+                              ? 'text-green-600 hover:bg-green-100'
+                              : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'
                           }`}
                         >
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              {session.type === 'lab' ? (
-                                <FlaskConical className="w-5 h-5 text-orange-600" />
-                              ) : (
-                                <Play className="w-5 h-5 text-blue-600" />
-                              )}
-                              <span className={`font-medium ${
-                                sessionProgress?.completed ? 'text-green-800' : 'text-slate-700'
-                              }`}>
-                                {session.name}
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => updateProgress(
-                                resourceName, 
-                                moduleName, 
-                                session.name, 
-                                !sessionProgress?.completed
-                              )}
-                              className={`p-1.5 rounded-full transition-colors ${
-                                sessionProgress?.completed
-                                  ? 'text-green-600 hover:bg-green-100'
-                                  : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'
-                              }`}
-                            >
-                              {sessionProgress?.completed ? (
-                                <CheckCircle2 className="w-6 h-6" />
-                              ) : (
-                                <Circle className="w-6 h-6" />
-                              )}
-                            </button>
-                          </div>
-                          {sessionProgress?.completed && sessionProgress?.completed_at && (
-                            <div className="text-xs text-green-600">
-                              Hoàn thành: {new Date(sessionProgress.completed_at).toLocaleDateString('vi-VN')}
-                            </div>
+                          {level.completed ? (
+                            <CheckCircle2 className="w-6 h-6" />
+                          ) : (
+                            <Circle className="w-6 h-6" />
                           )}
+                        </button>
+                      </div>
+                      {level.completed && level.completed_at && (
+                        <div className="text-xs text-green-600">
+                          Hoàn thành: {new Date(level.completed_at).toLocaleDateString('vi-VN')}
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {navigationPath.length > 0 && (
-                  <div className="mt-6 pt-4 border-t border-slate-200">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleNavigation(navigationPath.slice(0, -1))}
-                      className="flex items-center gap-2"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      Quay lại
-                    </Button>
-                  </div>
-                )}
+                      )}
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -699,63 +528,21 @@ const Dashboard = () => {
                   </DialogHeader>
                   <form onSubmit={handleNoteSubmit} className="space-y-4">
                     {!editingNote && (
-                      <>
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-slate-700">Resource</label>
-                          <select
-                            value={noteForm.resource}
-                            onChange={(e) => setNoteForm({ ...noteForm, resource: e.target.value, module: '', session: '' })}
-                            className="w-full p-2 border border-slate-200 rounded-md focus:border-blue-500 focus:ring-blue-500"
-                            required
-                          >
-                            <option value="">Chọn resource</option>
-                            {structure.resources.map((resource) => (
-                              <option key={resource.name} value={resource.name}>{resource.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        
-                        {noteForm.resource && (
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Module</label>
-                            <select
-                              value={noteForm.module}
-                              onChange={(e) => setNoteForm({ ...noteForm, module: e.target.value, session: '' })}
-                              className="w-full p-2 border border-slate-200 rounded-md focus:border-blue-500 focus:ring-blue-500"
-                              required
-                            >
-                              <option value="">Chọn module</option>
-                              {structure.resources
-                                .find(r => r.name === noteForm.resource)?.modules
-                                .map((module) => (
-                                  <option key={module.name} value={module.name}>{module.name}</option>
-                                )) || []}
-                            </select>
-                          </div>
-                        )}
-                        
-                        {noteForm.module && (
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-700">Session</label>
-                            <select
-                              value={noteForm.session}
-                              onChange={(e) => setNoteForm({ ...noteForm, session: e.target.value })}
-                              className="w-full p-2 border border-slate-200 rounded-md focus:border-blue-500 focus:ring-blue-500"
-                              required
-                            >
-                              <option value="">Chọn session</option>
-                              {structure.resources
-                                .find(r => r.name === noteForm.resource)?.modules
-                                .find(m => m.name === noteForm.module)?.sessions
-                                .map((session) => (
-                                  <option key={session.name} value={session.name}>{session.name}</option>
-                                )) || []}
-                            </select>
-                          </div>
-                        )}
-                      </>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700">Module</label>
+                        <select
+                          value={noteForm.level}
+                          onChange={(e) => setNoteForm({ ...noteForm, level: e.target.value })}
+                          className="w-full p-2 border border-slate-200 rounded-md focus:border-blue-500 focus:ring-blue-500"
+                          required
+                        >
+                          <option value="">Chọn module</option>
+                          {levels.map((level) => (
+                            <option key={level} value={level}>{level}</option>
+                          ))}
+                        </select>
+                      </div>
                     )}
-                    
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-slate-700">Nội dung</label>
                       <Textarea
@@ -776,7 +563,7 @@ const Dashboard = () => {
                         variant="outline"
                         onClick={() => {
                           setIsNoteDialogOpen(false);
-                          setNoteForm({ resource: '', module: '', session: '', content: '' });
+                          setNoteForm({ level: '', content: '' });
                           setEditingNote(null);
                         }}
                       >
@@ -813,28 +600,15 @@ const Dashboard = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="flex gap-1">
-                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 text-xs">
-                              {note.resource}
-                            </Badge>
-                            <Badge variant="secondary" className="bg-green-50 text-green-700 text-xs">
-                              {note.module}
-                            </Badge>
-                            <Badge variant="secondary" className="bg-orange-50 text-orange-700 text-xs">
-                              {note.session}
-                            </Badge>
-                          </div>
+                          <Badge variant="secondary" className="bg-blue-50 text-blue-700">
+                            {note.level}
+                          </Badge>
                           {note.username === user?.username && (
                             <div className="flex gap-1">
                               <button
                                 onClick={() => {
                                   setEditingNote(note);
-                                  setNoteForm({ 
-                                    resource: note.resource, 
-                                    module: note.module, 
-                                    session: note.session, 
-                                    content: note.content 
-                                  });
+                                  setNoteForm({ level: note.level, content: note.content });
                                   setIsNoteDialogOpen(true);
                                 }}
                                 className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
@@ -872,7 +646,7 @@ const Dashboard = () => {
   );
 };
 
-// Protected Route Component (unchanged)
+// Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
