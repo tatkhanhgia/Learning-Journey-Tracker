@@ -1,60 +1,396 @@
 Youtube
-    Module 1: Giới thiệu về HTML/CSS
-        Session 1: HTML cơ bản
-        Session 2: CSS căn bản
-        Lab 1: Tạo trang web đầu tiên
-    Module 2: JavaScript cơ bản
-        Session 1: Biến và hàm
-        Session 2: DOM Manipulation
-        Lab 1: Tạo calculator đơn giản
-        Session 3: Events và Forms
-    Module 3: Responsive Design
-        Session 1: Media Queries
-        Session 2: Flexbox
-        Session 3: Grid Layout
-        Lab 1: Thiết kế mobile-first
-
-Page
-    Module 1: React Basics
-        Session 1: JSX và Components
-        Session 2: Props và State
-        Lab 1: Todo App
-        Session 3: Event Handling
-    Module 2: Advanced React
-        Session 1: Hooks
-        Session 2: Context API
-        Session 3: Performance Optimization
-        Lab 1: E-commerce App
-    Module 3: React Router
-        Session 1: Basic Routing
-        Session 2: Dynamic Routes
-        Lab 1: Multi-page Application
-
-Book
-    Module 1: Backend Development
-        Session 1: Node.js Fundamentals
-        Session 2: Express.js Setup
-        Lab 1: REST API Development
-        Session 3: Database Integration
-    Module 2: Database Design
-        Session 1: SQL Basics
-        Session 2: NoSQL with MongoDB
-        Session 3: Database Relationships
-        Lab 1: Design a Blog Database
-    Module 3: Authentication & Security
-        Session 1: JWT Tokens
-        Session 2: Password Hashing
-        Session 3: Role-based Access
-        Lab 1: User Management System
-
-Video
-    Module 1: Deployment & DevOps
-        Session 1: Git Fundamentals
-        Session 2: Docker Basics
-        Lab 1: Containerize an App
-        Session 3: CI/CD Pipelines
-    Module 2: Cloud Services
-        Session 1: AWS Basics
-        Session 2: Heroku Deployment
-        Session 3: Database Hosting
-        Lab 1: Deploy Full-stack App
+    Module 0: Giới thiệu khóa học
+        Session 1: First Cloud Journey Kick off 2024
+        Session 2: Hướng dẫn vẽ kiến trúc AWS trên draw.io
+        Session 3: Hướng dẫn làm workshop AWS
+    Module 1: Điện toán đám mây và AWS cơ bản
+        Session 1: Điện Toán Đám Mây Là Gì ?
+        Session 2: Điều Gì Tạo Nên Sự Khác Biệt Của AWS ?
+        Session 3: Bắt Đầu Hành Trình Lên Mây Như Thế Nào
+        Session 4: Hạ Tầng Toàn Cầu Của AWS
+        Session 5: Công Cụ Quản Lý AWS Services
+        Session 6: Tối Ưu Hóa Chi Phí Trên AWS và Làm Việc Với AWS Support
+        Session 7: Thực Hành và Nghiên Cứu Bổ Sung
+        Lab01-01: Create an AWS account
+        Lab01-02: Setup with Virtual MFA Device
+        Lab01-03: Create admin group and admin user
+        Lab01-04: Account authentication support
+        Lab07-01: Create Budget by Template
+        Lab07-02: Create Cost Budget Tutorial
+        Lab07-03: Creating a Usage Budget in AWS
+        Lab07-04: Creating a Reservation Instance (RI) Budget
+        Lab07-05: Creating a Savings Plans Budget
+        Lab07-06: Clean Up Budgets
+        Lab09-01: AWS support Packages
+        Lab09-02: Types of support requests
+        Lab09-03: Change support package
+        Lab09-04: Manage support requests
+    Module 2: AWS VPC và Networking
+        Session 1: AWS Virtual Private Cloud
+        Session 2: VPC Security and Multi‑VPC features
+        Session 3: VPN – DirectConnect – LoadBalancer – ExtraResources
+        Lab03-01: Start with Amazon VPC and AWS VPN Site‑to‑Site (Introduction)
+        Lab03-01.1: Subnets
+        Lab03-01.2: Route table
+        Lab03-01.3: Internet Gateway (IGW)
+        Lab03-01.4: NAT Gateway
+        Lab03-02.1: Security Group
+        Lab03-02.2: Network ACLs
+        Lab03-02.3: VPC Resource Map
+        Lab03-03.1: Create VPC
+        Lab03-03.2: Create Subnet
+        Lab03-03.3: Create an Internet Gateway
+        Lab03-03.4: Create Route Table for Outbound Internet Routing via IGW
+        Lab03-03.5: Create security groups
+        Lab03-04.1: Create EC2 Instances in Subnets
+        Lab03-04.2: Test connection
+        Lab03-04.3: Create NAT Gateway
+        Lab03-04.5: EC2 Instance Connect Endpoint
+        Lab10-01: Set up Hybrid DNS with Route 53 Resolver (Introduction)
+        Lab10-02.1: Generate Key Pair
+        Lab10-02.2: Initialize CloudFormation Template
+        Lab10-02.3: Configure Security Group
+        Lab10-03: Connect to RDGW
+        Lab10-05: Set up DNS
+        Lab10-05.1: Create Route 53 Outbound Endpoint
+        Lab10-05.2: Create Route 53 Resolver Rules
+        Lab10-05.3: Create Route 53 Inbound Endpoints
+        Lab10-05.4: Test results
+        Lab10-06: Clean up resources
+        Lab19-01: Set up VPC peering (Introduction)
+        Lab19-02.1: Initialize CloudFormation Templates
+        Lab19-02.2: Create Security group
+        Lab19-02.3: Create EC2 instance
+        Lab19-03: Update Network ACL (NACLs)
+        Lab19-04: Create a peering connection
+        Lab19-05: Configure Route tables
+        Lab19-06: Enable Cross‑Peer DNS
+        Lab19-07: Clean up resources
+        Lab20-01: Set up AWS Transit Gateway (Introduction)
+        Lab20-02: Preparation steps
+        Lab20-03: Create Transit Gateway
+        Lab20-04: Create Transit Gateway Attachments
+        Lab20-05: Create Transit Gateway Route Tables
+        Lab20-06: Add Transit Gateway Routes to VPC Route Tables
+        Lab20-07: Clean up resources
+    Module 3: Tính toán và Lưu trữ AWS
+        Session 1: Compute VM on AWS
+        Session 2: Amazon EC2 – Instance type
+        Session 3: Amazon EC2 – AMI / Backup / Key Pair
+        Session 4: Amazon EC2 – Elastic block store
+        Session 5: Amazon EC2 – Instance store
+        Session 6: Amazon EC2 – User data
+        Session 7: Amazon EC2 – Meta data
+        Session 8: Amazon EC2 – EC2 auto scaling
+        Session 9: EC2 Autoscaling – EFS/FSx – Lightsail – MGN
+        Lab13-01: Deploy AWS Backup to the System – Introduction
+        Lab13-02.2: Deploy infrastructure
+        Lab13-03: Create Backup plan
+        Lab13-05: Test Restore
+        Lab13-06: Clean up resources
+        Lab24-01.1: Create S3 Bucket
+        Lab24-01.2: Create EC2 for Storage Gateway
+        Lab24-02.1: Create Storage Gateway
+        Lab24-02.2: Create File Shares
+        Lab57-02.1: Create S3 bucket
+        Lab57-02.2: Load data
+        Lab57-03: Enable static website feature
+        Lab57-04: Configuring public access block
+        Lab57-05: Configuring public objects
+        Lab57-06: Test website
+        Lab57-07.1: Block all public access
+        Lab57-07.2: Config Amazon CloudFront
+        Lab57-07.3: Test Amazon Cloudfront
+        Lab57-08: Bucket Versioning
+        Lab57-09: Move objects
+        Lab57-10: Replication Object multi Region
+        Lab57-11: Clean up resources
+    Module 4: Dịch vụ lưu trữ AWS nâng cao
+        Session 1: Dịch Vụ Lưu Trữ Trên AWS
+        Session 2: Amazon Simple Storage Service – Access Point – Storage Class
+        Session 3: S3 Static Website & CORS – Control Access – Object Key & Performance – Glacier
+        Session 4: Snow Family – Storage Gateway – Backup
+        Lab13-02.1: Create S3 Bucket
+        Lab13-02.2: Deploy Infrastructure
+        Lab13-03: Create Backup Plan
+        Lab13-04: Set up notifications
+        Lab13-05: Test Restore
+        Lab13-06: Clean up resources
+        Lab14-01: VMWare Workstation
+        Lab14-02.1: Export Virtual Machine from On‑premises
+        Lab14-02.2: Upload virtual machine to AWS
+        Lab14-02.3: Import virtual machine to AWS
+        Lab14-02.4: Deploy Instance from AMI
+        Lab14-03.1: Setting up S3 bucket ACL
+        Lab14-03.2: Export virtual machine from Instance
+        Lab14-05: Resource Cleanup on AWS Cloud
+        Lab24-2.1: Create Storage Gateway
+        Lab24-2.2: Create File Shares
+        Lab24-2.3: Mount File shares on On‑premises machine
+        Lab24-3: Clean up resources
+        Lab25-2.2: Create an SSD Multi‑AZ file system
+        Lab25-2.3: Create an HDD Multi‑AZ file system
+        Lab25-3: Create new file shares
+        Lab25-4: Test Performance
+        Lab25-5: Monitor Performance
+        Lab25-6: Enable data deduplication
+        Lab25-7: Enable shadow copies
+        Lab25-8: Manage user sessions and open files
+        Lab25-9: Enable user storage quotas
+        Lab25-11: Scale throughput capacity
+        Lab25-12: Scale storage capacity
+        Lab25-13: Delete environment
+        Lab57-2.1: Create S3 bucket
+        Lab57-2.2: Load data
+        Lab57-3: Enable static website feature
+        Lab57-4: Configuring public access block
+        Lab57-5: Configuring public objects
+        Lab57-6: Test website
+        Lab57-7.1: Block all public access
+        Lab57-7.2: Config Amazon CloudFront
+        Lab57-7.3: Test Amazon Cloudfront
+        Lab57-8: Bucket Versioning
+        Lab57-9: Move objects
+        Lab57-10: Replication Object multi Region
+        Lab57-11: Clean up resources
+    Module 5: Bảo mật và Quản lý truy cập AWS
+        Session 1: Share Responsibility Model
+        Session 2: Amazon Identity and access management
+        Session 3: Amazon Cognito
+        Session 4: AWS Organization
+        Session 5: AWS Identity Center
+        Session 6: Amazon Key Management Service
+        Session 7: AWS Security Hub
+        Session 8: Hands‑on and Additional research
+        Lab18-02: Enable Security Hub
+        Lab18-03: Score for each set of criteria
+        Lab18-04: Clean up resources
+        Lab22-2.1: Create VPC
+        Lab22-2.2: Create Security Group
+        Lab22-2.3: Create EC2 instance
+        Lab22-2.4: Incoming Web‑hooks slack
+        Lab22-3: Create Tag for Instance
+        Lab22-4: Create Role for Lambda
+        Lab22-5.1: Function stop instance
+        Lab22-5.2: Function start instance
+        Lab22-6: Check Result
+        Lab22-7: Clean up resources
+        Lab27-2.1.1: Create EC2 Instance with tag
+        Lab27-2.1.2: Managing Tags in AWS Resources
+        Lab27-2.1.3: Filter resources by tag
+        Lab27-2.2: Using tags with CLI
+        Lab27-3: Create a Resource Group
+        Lab27-4: Clean up resources
+        Lab28-2.1: Create IAM user
+        Lab28-3: Create IAM Policy
+        Lab28-4: Create IAM Role
+        Lab28-5.1: Switch Roles
+        Lab28-5.2.1: Initiating access to EC2 console in AWS Region – Tokyo
+        Lab28-5.2.2: Initiating access to EC2 console in AWS Region – North Virginia
+        Lab28-5.2.3: Proceed to create EC2 instance when there are no and qualified Tags
+        Lab28-5.2.4: Edit Resource Tag on EC2 Instance
+        Lab28-5.2.5: Policy Check
+        Lab28-6: Clean up resources
+        Lab30-3: Create Restriction Policy
+        Lab30-4: Create IAM Limited User
+        Lab30-5: Test IAM User Limits
+        Lab30-6: Clean up resources
+        Lab33-2.1: Create Policy and Role
+        Lab33-2.2: Create Group and User
+        Lab33-3: Create Key Management Service
+        Lab33-4.1: Create Bucket
+        Lab33-4.2: Upload data to S3
+        Lab33-5.1: Create CloudTrail
+        Lab33-5.2: Logging to CloudTrail
+        Lab33-5.3: Create Amazon Athena
+        Lab33-5.4: Retrieve data with Athena
+        Lab33-6: Test and share encrypted data on S3
+		Lab33-7: Resource cleanup
+		Lab44-2: Create IAM Group
+		Lab44-3.1: Create IAM User
+AWS Portal
+	Week-1: Network foundation
+		Content-1: Introduce to AWS
+		Content-2: AWS Global Infrastructure
+		Content-3: Cost Management & Optimization
+		Content-4: Region and Availability Zones (AZs)
+		Content-5: VPC Overview
+		Content-6: Multi VPC Network
+		Content-7: Network Foundation Quiz
+	Week-2: Database and storage foundation
+		Content-1: AWS Storage Class
+		Content-2: Block Storage
+		Content-3: AWS Database Managed Services
+		Content-4: AWS Databases – The right tool for the right job
+		Content-5: Database and storage foundation quiz
+	Week-3: Soft skills and SoW Best practices
+		Content-1: SOW for POC & Non‑MAP
+		Content-2: CloudFront Soft skills and SoW quiz
+	Week-4: Amazon EKS
+		Content-1: AWS Amazon EKS Overview
+		Content-2: AWS EKS Endpoint Access
+		Content-3: AWS EKS Pods Networking
+		Content-4: AWS Exposing Applications
+		Content-5: AWS Amazon EKS Storage
+		Content-6: AWS Amazon EKS Autoscaling
+		Content-7: AWS EKS Quiz
+	Week-5: Amazon ECS and Fargate
+		Content-1: AWS Intro of ECS and Fargate
+		Content-2: AWS Amazon ECS overview
+		Content-3: AWS ECS Service Architecture
+		Content-4: AWS Fargate Overview
+		Content-5: AWS Integrate ECS with other AWS Services
+		Content-6: AWS Good questions to ask your customers
+		Content-7: AWS Lab for ECS and Fargate
+		Content-8: AWS ECS Quiz
+	Week-6: Observability & Cost Management
+		Content-1: AWS Observability Best Practices
+		Content-2: AWS Observability Tools
+		Content-3: AWS Cost considerations for ECS
+		Content-4: AWS Cost Considerations for EKS
+		Content-5: Observability & Cost Management Quiz
+	Week-7: Migrate & Modernize with AWS
+		Content-1: Migration customer journey
+		Content-2: Migration Evaluator
+		Content-3: Application Discovery Service (ADS) & Migration Hub
+		Content-4: 7R migration pattern analysis
+		Content-5: Migration Readiness Assessment and Migration Portfolio Assessment
+		Content-6: AWS Application Migration Service
+		Content-7: Quiz Migrate & Modernize with AWS
+	Week-8: Managing and Governing multi‑account AWS environments
+		Content-1: Managing and Governing multi‑account AWS environments
+		Content-2: Using AWS Control Tower to govern multi‑account AWS environments at scale
+		Content-3: AWS Landing Zone best practices
+		Content-4: Quiz Managing and Governing multi‑account AWS environments
+	Week-9: Migration factory
+		Content-1: AWS Application Migration Service (AWS MGN)
+		Content-2: Migration Factory
+		Content-3: Part 2 – Disaster Recovery on AWS
+		Content-4: Why Use Cloud‑Based Disaster Recovery
+		Content-5: Part 3 – AWS Modernization With App2Container
+		Content-6: Migration factory quiz
+	Week-10: Lambda and API Gateway
+		Content-1: Introduce Serverless
+		Content-2: How Lambda Work
+		Content-3: Best Practise with Lambda
+		Content-4: API Gateway
+		Content-5: SAM – Serverless Application Model
+		Content-6: Lambda and API Gateway quiz
+	Week-11: Messaging services
+		Content-1: Introduce Messaging and EDA
+		Content-2: Amazon Simple Store (SQS)
+		Content-3: Amazon Simple Notification (SNS)
+		Content-4: Amazon EventBridge & Schema
+		Content-5: Use Cases
+		Content-6: Quiz Messaging services
+	Week-12: Building Data platform on AWS (part 1)
+		Content-1: Data Lake on AWS
+		Content-2: Ingestion
+		Content-3: Data Transformation
+		Content-4: Building Data platform on AWS (part 1) quiz
+	Week-13: Building Data platform on AWS (part 2)
+		Content-1: Module 4 – Data governance
+		Content-2: Module 5 – Data Warehouse
+		Content-3: Module 6 – Orchestration
+		Content-4: Quiz Building Data platform on AWS (part 2)
+	Week-14: Introduction to Machine Learning
+		Content-1: AI_ML on AWS Introduction
+		Content-2: AWS Amazon Rekognition Introduction & Identity Verification usecase Demo
+		Content-3: AWS Generative AI on AWS
+		Content-4: AWS AI Quiz
+	Week-15: Gen AI training for partners
+		Content-1: AWS What is Generative AI
+		Content-2: AWS A deeper look at some of these use cases
+		Content-3: AWS Prototyping Sharing
+		Content-4: AWS Demo GenAI in FSI
+		Content-5: AWS RAG – Retrieval Augmented Generation+Agent
+		Content-6: AWS Top concerns & solutions
+		Content-7: Quiz‑Sovico‑Week‑15‑Advanced‑AWS‑Generative‑AI‑Kahoot‑Quiz
+	Week-16: Threat detection and incident response using cloud native services
+		Content-1: The incident response lifecycle
+		Content-2: Preparation
+		Content-3: Detection
+		Content-4: Collection Containment Analysis
+		Content-5: Remediation Recovery Post‑incident activity
+		Content-6: Quiz‑Sovico‑Week‑16‑AWS‑Security‑Kahoot‑Questions
+Cloud Journey
+	Khám phá dịch vụ AWS
+		Tạo mới Tài khoản AWS
+		Quản lý mức chi phí sử dụng trên AWS với AWS Budgets
+		Yêu cầu hỗ trợ với AWS Support
+		Quản trị quyền truy cập với AWS Identity and Access Management (AWS IAM)
+		Triển khai hạ tầng mạng với Amazon Virtual Private Cloud (Amazon VPC)
+		Bắt đầu và triển khai ứng dụng trên Amazon Compute Cloud (Amazon EC2)
+		Cấp quyền cho ứng dụng truy cập dịch vụ AWS thông qua IAM Role
+		Sử dụng Cloud IDE trên trình duyệt với AWS Cloud9
+		Hosting static website với Amazon S3
+		Tạo cơ sở dữ liệu trên Amazon Relational Database Service (Amazon RDS)
+		Tối ưu chi phí tính toán với Amazon Lightsail
+		Tự động mở rộng quy mô ứng dụng với Amazon EC2 Autoscaling
+		Tạo bảng theo dõi hệ thống với Amazon CloudWatch
+		Thiết lập hệ thống DNS hybrid tích hợp giữa môi trường Local và Amazon VPC với Amazon Route 53
+		Sử dụng AWS CLI trên các Amazon EC2 (Windows/Ubuntu)
+		Highly Available Web Application Workshop
+	Dịch chuyển lên AWS
+		Dịch chuyển máy chủ ảo VM AWS VM Import/Export
+		Dịch chuyển CSDL với AWS Database Migration Service (DMS) và Schema Conversion Tool (SCT)
+	Tối ưu hệ thống
+		Bật tắt máy chủ tự động và nhắn tin qua Slack với AWS Lambda
+		Tạo bảng theo dõi hệ thống với Amazon CloudWatch và Grafana
+		Quản lý tài nguyên theo nhóm bằng Tag và Resource Groups
+		Quản trị quyền truy cập ứng dụng EC2 bằng Tag thông qua IAM
+		Quản lý dịch vụ và tự động hóa tác vụ sử dụng AWS System Manager
+		Làm việc với AWS Systems Manager – Session Manager
+		Khởi tạo hạ tầng dưới dạng Code với AWS CloudFormation
+		Thiết lập Single Sign‑On (Amazon SSO) cho Organization
+		Giới hạn quyền của user với IAM Permission Boundary
+		Giới hạn chuyển Role theo Condition
+		Kiểm tra đánh giá tiêu chuẩn bảo mật với AWS Security Hub
+		Bảo mật Ứng dụng và API với Web Application Firewall (AWS WAF)
+		Quản lý Khóa với dịch vụ Key Management Service (AWS KMS)
+		Triển khai kế hoạch sao lưu hệ thống với AWS Backup
+		Liên kết các Virtual Private Cloud (VPC) với VPC Peering
+		Quản lý tập trung các kết nối với AWS Transit Gateway
+		Triển khai Ứng dụng với Docker
+		Triển khai Ứng dụng trên Amazon Elastic Container Service (Amazon ECS)
+		Triển khai dự ứng dụng với AWS CodePipeline
+		Tự động hóa triển khai ứng dụng AWS CodePipeline
+		Lưu trữ dữ liệu không giới hạn trên AWS với File Storage Gateway
+		Triển khai kho lưu trữ truy cập chung cho Windows sử dụng FSx
+		Xây dựng Data lake trên AWS
+		Kiến trúc nâng cao với Amazon DynamoDB
+		Tối ưu chi phí với Savings Plans, Reserved Instance, Reserved DB Instance
+		Lựa chọn kích thước tính toán phù hợp với Amazon EC2 Resource Optimization
+		Trực quan hóa chi phí sử dụng trên AWS
+		Phân tích chi phí sử dụng nâng cao với AWS Glue và Amazon Athena
+	Hiện đại hóa ứng dụng
+		Dịch chuyển ứng dụng Monolith
+		Tự động phát hành ứng dụng
+		Tạo một Microservice
+		Cơ cấu lại dữ liệu và quy trình làm việc
+		Microservice Messaging via Eventing
+		Tạo và chứng thực Single Page Application
+		Trải nghiệm các dịch vụ AWS
+		Bắt đầu với AWS Step Functions
+		Serverless – Lambda tương tác với S3 và DynamoDB
+		Serverless – Hướng dẫn viết Frontend gọi API Gateway
+		Serverless – Triển khai ứng dụng trên SAM
+		Serverless – Xác thực với Amazon Cognito
+		Serverless – Thiết lập trang website static có SSL trên S3
+		Serverless – Xử lý đơn hàng với SQS và SNS
+		Serverless – CI/CD với AWS CodePipeline
+		Serverless – Giám sát Lambda với CloudWatch và X‑Ray
+		Serverless – Giới thiệu AWS AppSync
+	Container services
+		Bắt đầu với Amazon Lightsail Container (Amazon Lightsail)
+		Bắt đầu với Amazon EKS
+		CI/CD với CodePipeline
+		Monolith to Microservices với Docker và AWS Fargate
+		CI/CD trên EKS với CodePipeline và GitHub
+	Data & Analytics
+		Xây dựng Data lake trên AWS
+		Xây dựng Datalake với dữ liệu của bạn
+		Các dịch vụ phân tích dữ liệu trên AWS
+		Bắt đầu với Amazon QuickSight
+	AI/ML service trên AWS
+		Bắt đầu với Amazon SageMaker
