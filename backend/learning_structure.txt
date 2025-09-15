@@ -4,6 +4,7 @@ Youtube
         Session 2: Hướng dẫn vẽ kiến trúc AWS trên draw.io
         Session 3: Hướng dẫn làm workshop AWS
 		Session 4: Xin chaof nhen
+		Session 5: Update new
 	Module 0.1: Herllo
 		Session 111: xon wew
     Module 1: Điện toán đám mây và AWS cơ bản
