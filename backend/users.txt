@@ -1,5 +1,11 @@
-admin,admin123,Quản Trị Viên
-user1,pass1,Nguyễn Văn An
-user2,pass2,Trần Thị Bình
-user3,pass3,Lê Hoàng Cường
-user4,pass4,Phạm Minh Đức
+giatk,giatk,TKG
+trieupn,trieupn,Phan Ngọc Triệu
+phuongtk,phuongtk,Thái Kiều Phương
+sangnt,sangnt,Ngô Tấn Sang
+sonns,sonns,Nguyễn Sỹ Sơn
+hieupq,hieupq,Phạm Quang Hiếu
+nganvk,nganvk,Võ Kim Ngân
+hangltm,hangltm,Lê Thị Mỹ Hằng
+daond,daond,Nguyễn Duy Đạo
+tungts,tungts,Trần Sơn Tùng
+hiennd,hiennd,Nguyễn Duy Hiến
