@@ -2,11 +2,7 @@ Youtube
     Module 0: Giới thiệu khóa học
         Session 1: First Cloud Journey Kick off 2024
         Session 2: Hướng dẫn vẽ kiến trúc AWS trên draw.io
-        Session 3: Hướng dẫn làm workshop AWS
-		Session 4: Xin chaof nhen
-		Session 5: Update new
-	Module 0.1: Herllo
-		Session 111: xon wew
+        Session 3: Hướng dẫn làm workshop AWS		
     Module 1: Điện toán đám mây và AWS cơ bản
         Session 1: Điện Toán Đám Mây Là Gì ?
         Session 2: Điều Gì Tạo Nên Sự Khác Biệt Của AWS ?
