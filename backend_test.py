@@ -886,9 +886,9 @@ class LearnTrackHierarchicalAPITester:
             
             # Create share as user1
             user1_share_id = self.test_create_url_share(
-                "User1 Learning Resource",
-                "Resource shared by user1",
-                "https://user1-resource.com"
+                "Trieupn Learning Resource",
+                "Resource shared by trieupn",
+                "https://trieupn-resource.com"
             )
             
             # Test permission restrictions - try to update admin's share
