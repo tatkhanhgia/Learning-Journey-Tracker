@@ -105,6 +105,38 @@ class NoteCreate(BaseModel):
 class NoteUpdate(BaseModel):
     content: str
 
+class Share(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    type: str  # "url" or "file"
+    content: str  # URL or file path
+    created_by: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None
+    # File specific fields
+    file_name: Optional[str] = None
+    file_size: Optional[int] = None
+    file_type: Optional[str] = None
+
+class ShareCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    type: str  # "url" or "file"
+    content: str  # URL (for type=url)
+
+class ShareUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    content: Optional[str] = None  # Only for URL updates
+
+class ShareResponse(BaseModel):
+    items: List[Share]
+    total: int
+    page: int
+    limit: int
+    total_pages: int
+
 # Helper functions
 def load_users():
     """Load users from users.txt file"""
