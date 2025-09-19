@@ -785,7 +785,130 @@ class LearnTrackHierarchicalAPITester:
         # Test invalid note creation
         self.test_invalid_note_creation()
         
-        # Test 9: Test with different user
+        # Test 9: Comprehensive Sharing System Tests
+        print("\n📋 Testing Sharing System")
+        
+        # Test empty shares initially
+        self.test_get_shares_empty()
+        
+        # Test URL share creation
+        url_share_id = self.test_create_url_share(
+            "Learning React Documentation", 
+            "Official React documentation for learning modern web development",
+            "https://react.dev/learn"
+        )
+        
+        # Test another URL share
+        url_share_id2 = self.test_create_url_share(
+            "FastAPI Tutorial",
+            "Complete guide to building APIs with FastAPI",
+            "https://fastapi.tiangolo.com/tutorial/"
+        )
+        
+        # Test invalid URL creation
+        self.test_create_invalid_url_share()
+        self.test_create_file_share_via_url_endpoint()
+        
+        # Test file uploads
+        pdf_share_id = self.test_upload_file_share(
+            "Learning Guide PDF",
+            "Comprehensive learning guide for web development",
+            "learning_guide.pdf",
+            "This is a sample PDF content for testing file upload functionality.",
+            "application/pdf"
+        )
+        
+        txt_share_id = self.test_upload_file_share(
+            "Notes Text File",
+            "Personal notes and reminders",
+            "notes.txt",
+            "These are my personal learning notes:\n1. Learn React\n2. Master FastAPI\n3. Build projects",
+            "text/plain"
+        )
+        
+        # Test invalid file uploads
+        self.test_upload_invalid_file_type()
+        self.test_upload_large_file()
+        
+        # Test pagination and filtering
+        self.test_get_shares_with_pagination(1, 2)
+        self.test_get_shares_with_pagination(2, 2)
+        
+        # Test search functionality
+        self.test_search_shares("React")
+        self.test_search_shares("learning")
+        self.test_search_shares("nonexistent")
+        
+        # Test type filtering
+        self.test_filter_shares_by_type("all")
+        self.test_filter_shares_by_type("url")
+        self.test_filter_shares_by_type("file")
+        
+        # Test file serving (if we have uploaded files)
+        if pdf_share_id:
+            # Get the share to find the filename
+            success, details, response = self.make_request('GET', 'shares')
+            if success and 'items' in response:
+                for share in response['items']:
+                    if share.get('id') == pdf_share_id and share.get('type') == 'file':
+                        filename = share.get('content')
+                        if filename:
+                            self.test_get_file(filename)
+                        break
+        
+        # Test non-existent file
+        self.test_get_nonexistent_file()
+        
+        # Test share updates
+        if url_share_id:
+            self.test_update_share(url_share_id, 
+                                 title="Updated React Documentation",
+                                 description="Updated description for React docs",
+                                 content="https://react.dev/learn/start-a-new-react-project")
+        
+        # Test update validations
+        self.test_update_nonexistent_share()
+        
+        # Test 10: Multi-User Sharing Tests
+        print("\n📋 Testing Multi-User Sharing Functionality")
+        
+        # Create share as current user for permission testing
+        admin_share_id = self.test_create_url_share(
+            "Admin Only Share",
+            "This share belongs to admin user",
+            "https://admin-only-resource.com"
+        )
+        
+        # Switch to different user
+        if self.test_login("user1", "pass1"):
+            # Test accessing shares as different user
+            self.test_get_shares_with_pagination(1, 10)
+            
+            # Create share as user1
+            user1_share_id = self.test_create_url_share(
+                "User1 Learning Resource",
+                "Resource shared by user1",
+                "https://user1-resource.com"
+            )
+            
+            # Test permission restrictions - try to update admin's share
+            if admin_share_id:
+                self.test_update_others_share(admin_share_id)
+                self.test_delete_others_share(admin_share_id)
+            
+            # Clean up user1's share
+            if user1_share_id:
+                self.test_delete_share(user1_share_id)
+        
+        # Switch back to admin for cleanup
+        if self.test_login("admin", "admin123"):
+            # Test delete validations
+            self.test_delete_nonexistent_share()
+            
+            # Clean up remaining shares
+            self.cleanup_created_shares()
+        
+        # Test 11: Test with different user
         print("\n📋 Testing Multi-User Functionality")
         if self.test_login("user1", "pass1"):
             self.test_get_my_progress()
