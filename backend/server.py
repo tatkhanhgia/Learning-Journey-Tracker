@@ -775,7 +775,7 @@ async def update_share(
     if not share:
         raise HTTPException(status_code=404, detail="Share not found")
     
-    if share["created_by"] != current_user["username"]:
+    if share["created_by"] != current_user:
         raise HTTPException(status_code=403, detail="You can only edit your own shares")
     
     # Prepare update data
