@@ -747,7 +747,7 @@ async def upload_file_share(
         file_type=file.content_type
     )
     
-    await db.shares.insert_one(share.dict())
+    await db.shares.insert_one(prepare_for_mongo(share.dict()))
     return {"message": "File uploaded successfully", "id": share.id}
 
 @api_router.get("/shares/files/{filename}")
