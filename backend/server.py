@@ -703,7 +703,7 @@ async def upload_file_share(
     file: UploadFile = File(...),
     title: str = Form(...),
     description: str = Form(""),
-    current_user: dict = Depends(get_current_user)
+    current_user: str = Depends(verify_token)
 ):
     """Upload and create a file share"""
     # Validate file type
