@@ -689,7 +689,7 @@ class LearnTrackHierarchicalAPITester:
         
         # Test 2: Valid login
         print("\n📋 Testing Valid Authentication")
-        if not self.test_login("admin", "admin123"):
+        if not self.test_login("giatk", "giatk"):
             print("❌ Cannot proceed without valid login")
             return False
         
