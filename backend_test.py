@@ -20,6 +20,7 @@ class LearnTrackHierarchicalAPITester:
         self.tests_passed = 0
         self.test_results = []
         self.learning_structure = None
+        self.created_shares = []  # Track created shares for cleanup
 
     def log_test(self, name, success, details=""):
         """Log test results"""
