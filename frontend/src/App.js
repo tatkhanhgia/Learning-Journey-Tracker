@@ -496,7 +496,7 @@ const Dashboard = () => {
       {/* Main Content */}
       <main className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-4 max-w-2xl">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Users className="w-4 h-4" />
               Tổng quan
@@ -508,6 +508,10 @@ const Dashboard = () => {
             <TabsTrigger value="notes" className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
               Ghi chú
+            </TabsTrigger>
+            <TabsTrigger value="sharing" className="flex items-center gap-2">
+              <Share className="w-4 h-4" />
+              Chia sẻ
             </TabsTrigger>
           </TabsList>
 
