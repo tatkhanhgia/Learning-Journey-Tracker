@@ -286,6 +286,23 @@ const Dashboard = () => {
   const [noteForm, setNoteForm] = useState({ resource: '', module: '', session: '', content: '' });
   const [editingNote, setEditingNote] = useState(null);
 
+  // Sharing states
+  const [shares, setShares] = useState([]);
+  const [sharesLoading, setSharesLoading] = useState(false);
+  const [sharesPagination, setSharesPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    total_pages: 0
+  });
+  const [shareSearch, setShareSearch] = useState('');
+  const [shareTypeFilter, setShareTypeFilter] = useState('all');
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isShareUploadDialogOpen, setIsShareUploadDialogOpen] = useState(false);
+  const [shareForm, setShareForm] = useState({ title: '', description: '', type: 'url', content: '' });
+  const [editingShare, setEditingShare] = useState(null);
+  const [uploadFile, setUploadFile] = useState(null);
+
   useEffect(() => {
     fetchData();
   }, []);
