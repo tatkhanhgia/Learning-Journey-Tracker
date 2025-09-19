@@ -678,7 +678,7 @@ async def get_shares(
 @api_router.post("/shares")
 async def create_share(
     share_data: ShareCreate,
-    current_user: dict = Depends(get_current_user)
+    current_user: str = Depends(verify_token)
 ):
     """Create a new share item (URL only)"""
     if share_data.type == "file":
