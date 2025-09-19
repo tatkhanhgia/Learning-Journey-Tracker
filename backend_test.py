@@ -880,7 +880,7 @@ class LearnTrackHierarchicalAPITester:
         )
         
         # Switch to different user
-        if self.test_login("user1", "pass1"):
+        if self.test_login("trieupn", "trieupn"):
             # Test accessing shares as different user
             self.test_get_shares_with_pagination(1, 10)
             
