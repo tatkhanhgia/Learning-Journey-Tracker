@@ -354,6 +354,330 @@ class LearnTrackHierarchicalAPITester:
         self.log_test("Invalid login rejection", success, details)
         return success
 
+    # Sharing System Tests
+    def test_get_shares_empty(self):
+        """Test getting shares when none exist"""
+        success, details, response = self.make_request('GET', 'shares')
+        
+        if success and 'items' in response:
+            shares = response['items']
+            total = response.get('total', 0)
+            self.log_test("Get shares (empty)", True, f"Found {len(shares)} shares, total: {total}")
+            return response
+        else:
+            self.log_test("Get shares (empty)", False, details)
+            return None
+
+    def test_create_url_share(self, title, description, url):
+        """Test creating a URL share"""
+        success, details, response = self.make_request(
+            'POST', 'shares',
+            {
+                'title': title,
+                'description': description,
+                'type': 'url',
+                'content': url
+            }
+        )
+        
+        if success and 'id' in response:
+            share_id = response['id']
+            self.created_shares.append(share_id)
+            self.log_test(f"Create URL share: {title}", True, f"Created share with ID: {share_id}")
+            return share_id
+        else:
+            self.log_test(f"Create URL share: {title}", False, details)
+            return None
+
+    def test_create_invalid_url_share(self):
+        """Test creating URL share with invalid URL"""
+        success, details, response = self.make_request(
+            'POST', 'shares',
+            {
+                'title': 'Invalid URL Test',
+                'description': 'Testing invalid URL',
+                'type': 'url',
+                'content': 'not-a-valid-url'
+            },
+            expected_status=400
+        )
+        
+        self.log_test("Invalid URL share rejection", success, details)
+        return success
+
+    def test_create_file_share_via_url_endpoint(self):
+        """Test creating file share via URL endpoint (should fail)"""
+        success, details, response = self.make_request(
+            'POST', 'shares',
+            {
+                'title': 'File Test',
+                'description': 'Testing file via URL endpoint',
+                'type': 'file',
+                'content': 'test.pdf'
+            },
+            expected_status=400
+        )
+        
+        self.log_test("File share via URL endpoint rejection", success, details)
+        return success
+
+    def test_upload_file_share(self, title, description, filename, content, content_type):
+        """Test uploading a file share"""
+        url = f"{self.api_url}/shares/upload"
+        headers = {}
+        
+        if self.token:
+            headers['Authorization'] = f'Bearer {self.token}'
+
+        # Create multipart form data
+        files = {
+            'file': (filename, io.BytesIO(content.encode() if isinstance(content, str) else content), content_type)
+        }
+        data = {
+            'title': title,
+            'description': description
+        }
+
+        try:
+            response = requests.post(url, files=files, data=data, headers=headers, timeout=10)
+            success = response.status_code == 200
+            
+            try:
+                response_data = response.json()
+            except:
+                response_data = {"raw_response": response.text}
+
+            if success and 'id' in response_data:
+                share_id = response_data['id']
+                self.created_shares.append(share_id)
+                self.log_test(f"Upload file share: {title}", True, f"Uploaded file with ID: {share_id}")
+                return share_id
+            else:
+                details = f"Status: {response.status_code}, Response: {response_data}"
+                self.log_test(f"Upload file share: {title}", False, details)
+                return None
+
+        except requests.exceptions.RequestException as e:
+            self.log_test(f"Upload file share: {title}", False, f"Request failed: {str(e)}")
+            return None
+
+    def test_upload_invalid_file_type(self):
+        """Test uploading invalid file type"""
+        url = f"{self.api_url}/shares/upload"
+        headers = {}
+        
+        if self.token:
+            headers['Authorization'] = f'Bearer {self.token}'
+
+        # Create multipart form data with invalid file type
+        files = {
+            'file': ('test.exe', io.BytesIO(b'fake executable content'), 'application/x-executable')
+        }
+        data = {
+            'title': 'Invalid File Type Test',
+            'description': 'Testing invalid file type'
+        }
+
+        try:
+            response = requests.post(url, files=files, data=data, headers=headers, timeout=10)
+            success = response.status_code == 400
+            
+            self.log_test("Invalid file type rejection", success, f"Status: {response.status_code}")
+            return success
+
+        except requests.exceptions.RequestException as e:
+            self.log_test("Invalid file type rejection", False, f"Request failed: {str(e)}")
+            return False
+
+    def test_upload_large_file(self):
+        """Test uploading file exceeding size limit"""
+        url = f"{self.api_url}/shares/upload"
+        headers = {}
+        
+        if self.token:
+            headers['Authorization'] = f'Bearer {self.token}'
+
+        # Create large file content (11MB)
+        large_content = b'x' * (11 * 1024 * 1024)
+        files = {
+            'file': ('large_file.txt', io.BytesIO(large_content), 'text/plain')
+        }
+        data = {
+            'title': 'Large File Test',
+            'description': 'Testing file size limit'
+        }
+
+        try:
+            response = requests.post(url, files=files, data=data, headers=headers, timeout=30)
+            success = response.status_code == 400
+            
+            self.log_test("Large file rejection", success, f"Status: {response.status_code}")
+            return success
+
+        except requests.exceptions.RequestException as e:
+            self.log_test("Large file rejection", False, f"Request failed: {str(e)}")
+            return False
+
+    def test_get_shares_with_pagination(self, page=1, limit=5):
+        """Test getting shares with pagination"""
+        success, details, response = self.make_request('GET', f'shares?page={page}&limit={limit}')
+        
+        if success and 'items' in response:
+            shares = response['items']
+            total = response.get('total', 0)
+            current_page = response.get('page', 1)
+            total_pages = response.get('total_pages', 1)
+            
+            self.log_test(f"Get shares with pagination (page {page}, limit {limit})", True, 
+                         f"Found {len(shares)} shares, total: {total}, page: {current_page}/{total_pages}")
+            return response
+        else:
+            self.log_test(f"Get shares with pagination (page {page}, limit {limit})", False, details)
+            return None
+
+    def test_search_shares(self, search_term):
+        """Test searching shares"""
+        success, details, response = self.make_request('GET', f'shares?search={search_term}')
+        
+        if success and 'items' in response:
+            shares = response['items']
+            total = response.get('total', 0)
+            self.log_test(f"Search shares: '{search_term}'", True, f"Found {len(shares)} matching shares")
+            return response
+        else:
+            self.log_test(f"Search shares: '{search_term}'", False, details)
+            return None
+
+    def test_filter_shares_by_type(self, type_filter):
+        """Test filtering shares by type"""
+        success, details, response = self.make_request('GET', f'shares?type_filter={type_filter}')
+        
+        if success and 'items' in response:
+            shares = response['items']
+            total = response.get('total', 0)
+            # Verify all returned shares match the filter
+            if shares:
+                types = [share.get('type') for share in shares]
+                all_match = all(t == type_filter for t in types) if type_filter != 'all' else True
+                if all_match:
+                    self.log_test(f"Filter shares by type: {type_filter}", True, f"Found {len(shares)} {type_filter} shares")
+                else:
+                    self.log_test(f"Filter shares by type: {type_filter}", False, f"Filter not working correctly: {types}")
+            else:
+                self.log_test(f"Filter shares by type: {type_filter}", True, f"No {type_filter} shares found")
+            return response
+        else:
+            self.log_test(f"Filter shares by type: {type_filter}", False, details)
+            return None
+
+    def test_get_file(self, filename):
+        """Test serving uploaded files"""
+        success, details, response = self.make_request('GET', f'shares/files/{filename}')
+        
+        # For file serving, we expect different response handling
+        url = f"{self.api_url}/shares/files/{filename}"
+        headers = {}
+        
+        if self.token:
+            headers['Authorization'] = f'Bearer {self.token}'
+
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            success = response.status_code == 200
+            
+            if success:
+                content_type = response.headers.get('content-type', 'unknown')
+                content_length = len(response.content)
+                self.log_test(f"Get file: {filename}", True, f"File served, type: {content_type}, size: {content_length} bytes")
+            else:
+                self.log_test(f"Get file: {filename}", False, f"Status: {response.status_code}")
+            
+            return success
+
+        except requests.exceptions.RequestException as e:
+            self.log_test(f"Get file: {filename}", False, f"Request failed: {str(e)}")
+            return False
+
+    def test_get_nonexistent_file(self):
+        """Test serving non-existent file"""
+        success, details, response = self.make_request('GET', 'shares/files/nonexistent.txt', expected_status=404)
+        self.log_test("Non-existent file rejection", success, details)
+        return success
+
+    def test_update_share(self, share_id, title=None, description=None, content=None):
+        """Test updating a share"""
+        update_data = {}
+        if title is not None:
+            update_data['title'] = title
+        if description is not None:
+            update_data['description'] = description
+        if content is not None:
+            update_data['content'] = content
+
+        success, details, response = self.make_request('PUT', f'shares/{share_id}', update_data)
+        
+        self.log_test(f"Update share: {share_id}", success, details)
+        return success
+
+    def test_update_nonexistent_share(self):
+        """Test updating non-existent share"""
+        success, details, response = self.make_request(
+            'PUT', 'shares/nonexistent-id',
+            {'title': 'Updated Title'},
+            expected_status=404
+        )
+        
+        self.log_test("Update non-existent share rejection", success, details)
+        return success
+
+    def test_update_others_share(self, share_id):
+        """Test updating another user's share (should fail)"""
+        success, details, response = self.make_request(
+            'PUT', f'shares/{share_id}',
+            {'title': 'Unauthorized Update'},
+            expected_status=403
+        )
+        
+        self.log_test("Update others' share rejection", success, details)
+        return success
+
+    def test_delete_share(self, share_id):
+        """Test deleting a share"""
+        success, details, response = self.make_request('DELETE', f'shares/{share_id}')
+        
+        if success:
+            # Remove from tracking list
+            if share_id in self.created_shares:
+                self.created_shares.remove(share_id)
+        
+        self.log_test(f"Delete share: {share_id}", success, details)
+        return success
+
+    def test_delete_nonexistent_share(self):
+        """Test deleting non-existent share"""
+        success, details, response = self.make_request(
+            'DELETE', 'shares/nonexistent-id',
+            expected_status=404
+        )
+        
+        self.log_test("Delete non-existent share rejection", success, details)
+        return success
+
+    def test_delete_others_share(self, share_id):
+        """Test deleting another user's share (should fail)"""
+        success, details, response = self.make_request(
+            'DELETE', f'shares/{share_id}',
+            expected_status=403
+        )
+        
+        self.log_test("Delete others' share rejection", success, details)
+        return success
+
+    def cleanup_created_shares(self):
+        """Clean up any remaining created shares"""
+        for share_id in self.created_shares[:]:  # Create a copy to iterate over
+            self.test_delete_share(share_id)
+
     def run_comprehensive_test(self):
         """Run all tests in sequence"""
         print("🚀 Starting LearnTrack Hierarchical API Testing Suite")
