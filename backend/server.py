@@ -802,7 +802,7 @@ async def delete_share(
     if not share:
         raise HTTPException(status_code=404, detail="Share not found")
     
-    if share["created_by"] != current_user["username"]:
+    if share["created_by"] != current_user:
         raise HTTPException(status_code=403, detail="You can only delete your own shares")
     
     # Delete file if it exists
