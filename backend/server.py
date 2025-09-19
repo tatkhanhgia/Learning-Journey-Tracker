@@ -768,7 +768,7 @@ async def get_file(filename: str):
 async def update_share(
     share_id: str,
     share_update: ShareUpdate,
-    current_user: dict = Depends(get_current_user)
+    current_user: str = Depends(verify_token)
 ):
     """Update a share item"""
     share = await db.shares.find_one({"id": share_id})
