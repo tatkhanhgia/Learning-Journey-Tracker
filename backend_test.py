@@ -891,7 +891,7 @@ class LearnTrackHierarchicalAPITester:
                 "https://trieupn-resource.com"
             )
             
-            # Test permission restrictions - try to update admin's share
+            # Test permission restrictions - try to update giatk's share
             if admin_share_id:
                 self.test_update_others_share(admin_share_id)
                 self.test_delete_others_share(admin_share_id)
