@@ -8,6 +8,7 @@ with new 3-tier hierarchy: Resources → Modules → Sessions
 import requests
 import sys
 import json
+import io
 from datetime import datetime
 
 class LearnTrackHierarchicalAPITester:
