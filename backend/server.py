@@ -795,7 +795,7 @@ async def update_share(
 @api_router.delete("/shares/{share_id}")
 async def delete_share(
     share_id: str,
-    current_user: dict = Depends(get_current_user)
+    current_user: str = Depends(verify_token)
 ):
     """Delete a share item"""
     share = await db.shares.find_one({"id": share_id})
