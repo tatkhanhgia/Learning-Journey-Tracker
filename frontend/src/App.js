@@ -463,6 +463,134 @@ const Dashboard = () => {
     setExpandedUser(expandedUser === username ? null : username);
   };
 
+  // Sharing functions
+  const fetchShares = async () => {
+    try {
+      setSharesLoading(true);
+      const response = await axios.get(`${API}/shares`, {
+        params: {
+          page: sharesPagination.page,
+          limit: sharesPagination.limit,
+          search: shareSearch,
+          type_filter: shareTypeFilter
+        }
+      });
+      
+      setShares(response.data.items);
+      setSharesPagination({
+        page: response.data.page,
+        limit: response.data.limit,
+        total: response.data.total,
+        total_pages: response.data.total_pages
+      });
+    } catch (error) {
+      console.error('Failed to fetch shares:', error);
+      toast.error('Không thể tải dữ liệu chia sẻ');
+    } finally {
+      setSharesLoading(false);
+    }
+  };
+
+  const handleShareSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      if (editingShare) {
+        await axios.put(`${API}/shares/${editingShare.id}`, shareForm);
+        toast.success('Đã cập nhật chia sẻ');
+      } else {
+        await axios.post(`${API}/shares`, shareForm);
+        toast.success('Đã tạo chia sẻ mới');
+      }
+      
+      setIsShareDialogOpen(false);
+      setShareForm({ title: '', description: '', type: 'url', content: '' });
+      setEditingShare(null);
+      fetchShares();
+    } catch (error) {
+      console.error('Failed to save share:', error);
+      toast.error(editingShare ? 'Không thể cập nhật chia sẻ' : 'Không thể tạo chia sẻ');
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    e.preventDefault();
+    
+    if (!uploadFile) {
+      toast.error('Vui lòng chọn file');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('file', uploadFile);
+    formData.append('title', shareForm.title);
+    formData.append('description', shareForm.description);
+    
+    try {
+      await axios.post(`${API}/shares/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      toast.success('Đã upload file thành công');
+      setIsShareUploadDialogOpen(false);
+      setShareForm({ title: '', description: '', type: 'url', content: '' });
+      setUploadFile(null);
+      fetchShares();
+    } catch (error) {
+      console.error('Failed to upload file:', error);
+      toast.error('Không thể upload file');
+    }
+  };
+
+  const deleteShare = async (shareId) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa chia sẻ này?')) return;
+
+    try {
+      await axios.delete(`${API}/shares/${shareId}`);
+      toast.success('Đã xóa chia sẻ');
+      fetchShares();
+    } catch (error) {
+      console.error('Failed to delete share:', error);
+      toast.error('Không thể xóa chia sẻ');
+    }
+  };
+
+  const editShare = (share) => {
+    setEditingShare(share);
+    setShareForm({
+      title: share.title,
+      description: share.description || '',
+      type: share.type,
+      content: share.content
+    });
+    setIsShareDialogOpen(true);
+  };
+
+  const handleShareSearch = () => {
+    setSharesPagination(prev => ({ ...prev, page: 1 }));
+    fetchShares();
+  };
+
+  const handleSharePageChange = (newPage) => {
+    setSharesPagination(prev => ({ ...prev, page: newPage }));
+  };
+
+  const getFileIcon = (fileType) => {
+    if (fileType?.startsWith('image/')) return <Image className="w-5 h-5" />;
+    if (fileType?.startsWith('video/')) return <Video className="w-5 h-5" />;
+    if (fileType === 'application/pdf') return <FileText className="w-5 h-5" />;
+    return <FileText className="w-5 h-5" />;
+  };
+
+  // Fetch shares when activeTab changes to sharing
+  useEffect(() => {
+    if (activeTab === 'sharing') {
+      fetchShares();
+    }
+  }, [activeTab, sharesPagination.page, shareSearch, shareTypeFilter]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
