@@ -901,7 +901,7 @@ class LearnTrackHierarchicalAPITester:
                 self.test_delete_share(user1_share_id)
         
         # Switch back to admin for cleanup
-        if self.test_login("admin", "admin123"):
+        if self.test_login("giatk", "giatk"):
             # Test delete validations
             self.test_delete_nonexistent_share()
             
