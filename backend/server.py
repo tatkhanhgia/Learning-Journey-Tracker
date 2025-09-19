@@ -663,7 +663,10 @@ async def get_shares(
     total = await db.shares.count_documents(filter_query)
     
     # Get paginated results
-    shares = await db.shares.find(filter_query).sort("created_at", -1).skip(skip).limit(limit).to_list(None)
+    shares_docs = await db.shares.find(filter_query).sort("created_at", -1).skip(skip).limit(limit).to_list(None)
+    
+    # Parse shares from MongoDB
+    shares = [parse_from_mongo(doc) for doc in shares_docs]
     
     total_pages = math.ceil(total / limit)
     
