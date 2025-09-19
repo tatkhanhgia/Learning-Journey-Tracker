@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Thiết kế lại trang tiến độ thành cấu trúc phân cấp 3 tầng: Resources → Modules → Sessions. Dữ liệu được định nghĩa trong file txt với thụt lề. Giao diện có breadcrumb và navigation phân cấp."
+user_problem_statement: "Thiết kế giúp tôi thêm một tab sử dụng để chia sẻ thông tin, các thông tin giống như sau: đường dẫn, file. Nếu được, bạn hãy thiết kế là khi click vào sẽ mở mới một tab và truy cập tới url đã set sẵn, nếu đó là file thì cho đọc trước trên trình duyệt. Ngoài ra giao diện thì sẽ hiển thị dạng dọc (tức mỗi file/,... là một dòng và có các title, giới thiệu sơ, ...). Phân trang giúp tôi luôn nhé đề phòng dữ liệu quá nhiều. Các dữ liệu, file thì ai cũng có thể up lên."
 
 backend:
   - task: "Parse learning structure from hierarchical txt file"
