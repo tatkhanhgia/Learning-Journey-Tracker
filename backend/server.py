@@ -695,7 +695,7 @@ async def create_share(
         created_by=current_user
     )
     
-    await db.shares.insert_one(share.dict())
+    await db.shares.insert_one(prepare_for_mongo(share.dict()))
     return {"message": "Share created successfully", "id": share.id}
 
 @api_router.post("/shares/upload")
