@@ -1069,6 +1069,317 @@ const Dashboard = () => {
               )}
             </div>
           </TabsContent>
+
+          {/* Sharing Tab */}
+          <TabsContent value="sharing" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-slate-800">Chia sẻ thông tin</h2>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setShareForm({ title: '', description: '', type: 'url', content: '' });
+                    setEditingShare(null);
+                    setIsShareDialogOpen(true);
+                  }}
+                  className="bg-white hover:bg-slate-50"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Chia sẻ URL
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setShareForm({ title: '', description: '', type: 'file', content: '' });
+                    setUploadFile(null);
+                    setIsShareUploadDialogOpen(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload File
+                </Button>
+              </div>
+            </div>
+
+            {/* Search and Filter */}
+            <Card className="shadow-sm border-slate-200">
+              <CardContent className="p-4">
+                <div className="flex gap-4 items-center">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                      <Input
+                        placeholder="Tìm kiếm trong tiêu đề và mô tả..."
+                        value={shareSearch}
+                        onChange={(e) => setShareSearch(e.target.value)}
+                        className="pl-10"
+                        onKeyPress={(e) => e.key === 'Enter' && handleShareSearch()}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      value={shareTypeFilter}
+                      onChange={(e) => setShareTypeFilter(e.target.value)}
+                      className="px-3 py-2 border border-slate-200 rounded-md text-sm"
+                    >
+                      <option value="all">Tất cả</option>
+                      <option value="url">URL</option>
+                      <option value="file">File</option>
+                    </select>
+                    <Button onClick={handleShareSearch} size="sm">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Lọc
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Shares List */}
+            <div className="space-y-4">
+              {sharesLoading ? (
+                <div className="text-center py-8">
+                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                  <div className="text-slate-600">Đang tải...</div>
+                </div>
+              ) : shares.length === 0 ? (
+                <Card className="shadow-sm border-slate-200">
+                  <CardContent className="p-8 text-center">
+                    <Share className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                    <div className="text-slate-600 mb-2">Chưa có chia sẻ nào</div>
+                    <div className="text-sm text-slate-500">Hãy chia sẻ URL hoặc file để mọi người cùng xem</div>
+                  </CardContent>
+                </Card>
+              ) : (
+                shares.map((share) => (
+                  <Card key={share.id} className="shadow-sm border-slate-200 hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-start gap-3 flex-1">
+                          <div className="flex-shrink-0 mt-1">
+                            {share.type === 'url' ? (
+                              <ExternalLink className="w-5 h-5 text-blue-600" />
+                            ) : (
+                              getFileIcon(share.file_type)
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-slate-800 mb-1 break-words">
+                              {share.title}
+                            </h3>
+                            {share.description && (
+                              <p className="text-sm text-slate-600 mb-2 break-words">
+                                {share.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-4 text-xs text-slate-500">
+                              <span>Chia sẻ bởi: {share.created_by}</span>
+                              <span>{new Date(share.created_at).toLocaleDateString('vi-VN')}</span>
+                              {share.type === 'file' && share.file_size && (
+                                <span>{Math.round(share.file_size / 1024)} KB</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                          {share.type === 'url' ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(share.content, '_blank')}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </Button>
+                          ) : (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(`${API}/shares/files/${share.content}`, '_blank')}
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  const link = document.createElement('a');
+                                  link.href = `${API}/shares/files/${share.content}`;
+                                  link.download = share.file_name || 'download';
+                                  link.click();
+                                }}
+                                className="text-green-600 hover:text-green-700"
+                              >
+                                <Download className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                          {user && user.username === share.created_by && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => editShare(share)}
+                                className="text-orange-600 hover:text-orange-700"
+                              >
+                                <Edit3 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => deleteShare(share.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+
+            {/* Pagination */}
+            {sharesPagination.total_pages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSharePageChange(sharesPagination.page - 1)}
+                  disabled={sharesPagination.page <= 1}
+                >
+                  Trước
+                </Button>
+                <span className="text-sm text-slate-600">
+                  Trang {sharesPagination.page} / {sharesPagination.total_pages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSharePageChange(sharesPagination.page + 1)}
+                  disabled={sharesPagination.page >= sharesPagination.total_pages}
+                >
+                  Sau
+                </Button>
+              </div>
+            )}
+
+            {/* Share URL Dialog */}
+            <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingShare ? 'Chỉnh sửa chia sẻ' : 'Chia sẻ URL'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {editingShare ? 'Cập nhật thông tin chia sẻ' : 'Chia sẻ đường dẫn với mọi người'}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleShareSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Tiêu đề</label>
+                    <Input
+                      value={shareForm.title}
+                      onChange={(e) => setShareForm({ ...shareForm, title: e.target.value })}
+                      placeholder="Nhập tiêu đề..."
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Mô tả (tùy chọn)</label>
+                    <Textarea
+                      value={shareForm.description}
+                      onChange={(e) => setShareForm({ ...shareForm, description: e.target.value })}
+                      placeholder="Nhập mô tả..."
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">URL</label>
+                    <Input
+                      type="url"
+                      value={shareForm.content}
+                      onChange={(e) => setShareForm({ ...shareForm, content: e.target.value })}
+                      placeholder="https://example.com"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setIsShareDialogOpen(false)}>
+                      Hủy
+                    </Button>
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                      {editingShare ? 'Cập nhật' : 'Chia sẻ'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            {/* Upload File Dialog */}
+            <Dialog open={isShareUploadDialogOpen} onOpenChange={setIsShareUploadDialogOpen}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Upload File</DialogTitle>
+                  <DialogDescription>
+                    Chia sẻ file với mọi người
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleFileUpload} className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Tiêu đề</label>
+                    <Input
+                      value={shareForm.title}
+                      onChange={(e) => setShareForm({ ...shareForm, title: e.target.value })}
+                      placeholder="Nhập tiêu đề..."
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Mô tả (tùy chọn)</label>
+                    <Textarea
+                      value={shareForm.description}
+                      onChange={(e) => setShareForm({ ...shareForm, description: e.target.value })}
+                      placeholder="Nhập mô tả..."
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">File</label>
+                    <Input
+                      type="file"
+                      onChange={(e) => setUploadFile(e.target.files[0])}
+                      accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.mp4,.avi,.mov"
+                      required
+                    />
+                    <div className="text-xs text-slate-500">
+                      Hỗ trợ: hình ảnh, PDF, tài liệu, video (tối đa 10MB)
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setIsShareUploadDialogOpen(false)}>
+                      Hủy
+                    </Button>
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                      Upload
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </TabsContent>
         </Tabs>
       </main>
     </div>
