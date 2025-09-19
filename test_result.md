@@ -270,12 +270,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Update progress tracking UI for hierarchical structure"
-    - "Implement dropdown-style progress overview"
+    - "Implement sharing system backend with file upload"
+    - "Add sharing tab with file upload and URL sharing"
   stuck_tasks:
     - "Update progress tracking UI for hierarchical structure"
   test_all: false
-  test_priority: "stuck_first"
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
