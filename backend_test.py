@@ -910,7 +910,7 @@ class LearnTrackHierarchicalAPITester:
         
         # Test 11: Test with different user
         print("\n📋 Testing Multi-User Functionality")
-        if self.test_login("user1", "pass1"):
+        if self.test_login("trieupn", "trieupn"):
             self.test_get_my_progress()
             
             # Test creating note as different user - use Book resource
