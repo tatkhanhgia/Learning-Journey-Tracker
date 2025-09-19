@@ -632,6 +632,191 @@ async def delete_note(note_id: str, current_user: str = Depends(verify_token)):
     await db.notes.delete_one({"id": note_id})
     return {"message": "Note deleted successfully"}
 
+# Create uploads directory
+UPLOAD_DIR = ROOT_DIR / "uploads"
+UPLOAD_DIR.mkdir(exist_ok=True)
+
+# Sharing endpoints
+@api_router.get("/shares", response_model=ShareResponse)
+async def get_shares(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1, le=50),
+    search: str = Query("", description="Search in title and description"),
+    type_filter: str = Query("all", description="Filter by type: all, url, file"),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get paginated shares with search and filter"""
+    skip = (page - 1) * limit
+    
+    # Build filter query
+    filter_query = {}
+    if search:
+        filter_query["$or"] = [
+            {"title": {"$regex": search, "$options": "i"}},
+            {"description": {"$regex": search, "$options": "i"}}
+        ]
+    
+    if type_filter != "all":
+        filter_query["type"] = type_filter
+    
+    # Get total count
+    total = await db.shares.count_documents(filter_query)
+    
+    # Get paginated results
+    shares = await db.shares.find(filter_query).sort("created_at", -1).skip(skip).limit(limit).to_list(None)
+    
+    total_pages = math.ceil(total / limit)
+    
+    return ShareResponse(
+        items=shares,
+        total=total,
+        page=page,
+        limit=limit,
+        total_pages=total_pages
+    )
+
+@api_router.post("/shares")
+async def create_share(
+    share_data: ShareCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Create a new share item (URL only)"""
+    if share_data.type == "file":
+        raise HTTPException(status_code=400, detail="Use upload endpoint for files")
+    
+    if share_data.type == "url" and not share_data.content.startswith(("http://", "https://")):
+        raise HTTPException(status_code=400, detail="Invalid URL format")
+    
+    share = Share(
+        title=share_data.title,
+        description=share_data.description,
+        type=share_data.type,
+        content=share_data.content,
+        created_by=current_user["username"]
+    )
+    
+    await db.shares.insert_one(share.dict())
+    return {"message": "Share created successfully", "id": share.id}
+
+@api_router.post("/shares/upload")
+async def upload_file_share(
+    file: UploadFile = File(...),
+    title: str = Form(...),
+    description: str = Form(""),
+    current_user: dict = Depends(get_current_user)
+):
+    """Upload and create a file share"""
+    # Validate file type
+    allowed_types = {
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+        'application/pdf', 'text/plain', 'text/csv',
+        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'video/mp4', 'video/avi', 'video/mov'
+    }
+    
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail=f"File type not allowed: {file.content_type}")
+    
+    # Check file size (10MB limit)
+    if file.size > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File size exceeds 10MB limit")
+    
+    # Generate unique filename
+    file_extension = Path(file.filename).suffix
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+    file_path = UPLOAD_DIR / unique_filename
+    
+    # Save file
+    try:
+        async with aiofiles.open(file_path, 'wb') as f:
+            content = await file.read()
+            await f.write(content)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
+    
+    # Create share entry
+    share = Share(
+        title=title,
+        description=description,
+        type="file",
+        content=str(unique_filename),
+        created_by=current_user["username"],
+        file_name=file.filename,
+        file_size=file.size,
+        file_type=file.content_type
+    )
+    
+    await db.shares.insert_one(share.dict())
+    return {"message": "File uploaded successfully", "id": share.id}
+
+@api_router.get("/shares/files/{filename}")
+async def get_file(filename: str):
+    """Serve uploaded files"""
+    file_path = UPLOAD_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Get mime type
+    mime_type, _ = mimetypes.guess_type(str(file_path))
+    if not mime_type:
+        mime_type = "application/octet-stream"
+    
+    return FileResponse(file_path, media_type=mime_type)
+
+@api_router.put("/shares/{share_id}")
+async def update_share(
+    share_id: str,
+    share_update: ShareUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update a share item"""
+    share = await db.shares.find_one({"id": share_id})
+    if not share:
+        raise HTTPException(status_code=404, detail="Share not found")
+    
+    if share["created_by"] != current_user["username"]:
+        raise HTTPException(status_code=403, detail="You can only edit your own shares")
+    
+    # Prepare update data
+    update_data = {"updated_at": datetime.now(timezone.utc)}
+    if share_update.title is not None:
+        update_data["title"] = share_update.title
+    if share_update.description is not None:
+        update_data["description"] = share_update.description
+    if share_update.content is not None and share["type"] == "url":
+        if not share_update.content.startswith(("http://", "https://")):
+            raise HTTPException(status_code=400, detail="Invalid URL format")
+        update_data["content"] = share_update.content
+    
+    await db.shares.update_one({"id": share_id}, {"$set": update_data})
+    return {"message": "Share updated successfully"}
+
+@api_router.delete("/shares/{share_id}")
+async def delete_share(
+    share_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Delete a share item"""
+    share = await db.shares.find_one({"id": share_id})
+    if not share:
+        raise HTTPException(status_code=404, detail="Share not found")
+    
+    if share["created_by"] != current_user["username"]:
+        raise HTTPException(status_code=403, detail="You can only delete your own shares")
+    
+    # Delete file if it exists
+    if share["type"] == "file":
+        file_path = UPLOAD_DIR / share["content"]
+        if file_path.exists():
+            try:
+                file_path.unlink()
+            except Exception as e:
+                logger.warning(f"Failed to delete file {file_path}: {e}")
+    
+    await db.shares.delete_one({"id": share_id})
+    return {"message": "Share deleted successfully"}
+
 # Include the router in the main app
 app.include_router(api_router)
 
