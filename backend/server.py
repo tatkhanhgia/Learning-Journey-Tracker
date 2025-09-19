@@ -741,7 +741,7 @@ async def upload_file_share(
         description=description,
         type="file",
         content=str(unique_filename),
-        created_by=current_user["username"],
+        created_by=current_user,
         file_name=file.filename,
         file_size=file.size,
         file_type=file.content_type
