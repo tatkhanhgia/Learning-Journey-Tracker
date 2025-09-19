@@ -929,7 +929,7 @@ class LearnTrackHierarchicalAPITester:
                         test_session = book_resource['modules'][0]['sessions'][0]['name']
                         
                         user1_note_id = self.test_create_note(test_resource, test_module, test_session, 
-                                                             "Note from user1 in hierarchical system")
+                                                             "Note from trieupn in hierarchical system")
                         if user1_note_id:
                             self.test_delete_note(user1_note_id)
         
