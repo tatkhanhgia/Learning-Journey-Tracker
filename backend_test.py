@@ -874,9 +874,9 @@ class LearnTrackHierarchicalAPITester:
         
         # Create share as current user for permission testing
         admin_share_id = self.test_create_url_share(
-            "Admin Only Share",
-            "This share belongs to admin user",
-            "https://admin-only-resource.com"
+            "Giatk Only Share",
+            "This share belongs to giatk user",
+            "https://giatk-only-resource.com"
         )
         
         # Switch to different user
