@@ -29,7 +29,16 @@ import {
   ArrowLeft,
   Home,
   Play,
-  FlaskConical
+  FlaskConical,
+  Share,
+  Upload,
+  ExternalLink,
+  Search,
+  Filter,
+  FileText,
+  Image,
+  Video,
+  Download
 } from 'lucide-react';
 import './App.css';
 
