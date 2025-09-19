@@ -643,7 +643,7 @@ async def get_shares(
     limit: int = Query(10, ge=1, le=50),
     search: str = Query("", description="Search in title and description"),
     type_filter: str = Query("all", description="Filter by type: all, url, file"),
-    current_user: dict = Depends(get_current_user)
+    current_user: str = Depends(verify_token)
 ):
     """Get paginated shares with search and filter"""
     skip = (page - 1) * limit
