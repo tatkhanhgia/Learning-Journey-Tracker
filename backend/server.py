@@ -782,7 +782,7 @@ async def update_share(
         raise HTTPException(status_code=403, detail="You can only edit your own shares")
     
     # Prepare update data
-    update_data = {"updated_at": datetime.now(timezone.utc)}
+    update_data = {"updated_at": datetime.now(timezone.utc).isoformat()}
     if share_update.title is not None:
         update_data["title"] = share_update.title
     if share_update.description is not None:
