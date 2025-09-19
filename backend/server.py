@@ -692,7 +692,7 @@ async def create_share(
         description=share_data.description,
         type=share_data.type,
         content=share_data.content,
-        created_by=current_user["username"]
+        created_by=current_user
     )
     
     await db.shares.insert_one(share.dict())
